@@ -1,0 +1,57 @@
+#!/usr/bin/python3
+# Copyright (c) Turnkey GNU/Linux <admin@turnkeylinux.org> 
+#
+# this file is part of tkldev-detective.
+#
+# tkldev-detective is free software: you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by the Free
+# Software Foundation, either version 3 of the License, or (at your option) any
+# later version.
+#
+# tkldev-detective is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+# details.
+#
+# You should have received a copy of the GNU General Public License along with
+# tkldev-detective. If not, see <https://www.gnu.org/licenses/>.
+from argparse import ArgumentParser
+from os.path import relpath, abspath
+from typing import Generator
+
+from libtkldet import locator, modman, report
+import libtkldet
+import libtkldet.classifier
+import libtkldet.linter
+
+
+def perform_lint(root: str) -> Generator[report.Report, None, None]:
+    for path in locator.locator(args.appliance):
+        item = libtkldet.classifier.FileItem(
+            value=path,
+            _tags={},
+            relpath=relpath(path, start=root),
+            abspath=abspath(path),
+        )
+        for classifier in all_classifiers:
+            classifier.classify(item)
+        for linter in all_linters:
+            gen = linter.do_check(item)
+            if gen:
+                yield from gen
+
+
+if __name__ == "__main__":
+    parser = ArgumentParser()
+    parser.add_argument("appliance", type=str)
+
+    args = parser.parse_args()
+
+    modman.load_modules()
+
+    all_classifiers = libtkldet.classifier.get_weighted_classifiers()
+    all_linters = libtkldet.linter.get_weighted_linters()
+
+    for report in perform_lint(args.appliance):
+        print("\n|   ".join(report.format().split("\n")))
+        print()
