@@ -22,7 +22,7 @@ from enum import Enum
 import enum
 from typing import Union
 
-from .classifier import Item
+from .classifier import Item, FileItem
 from .colors import CYAN, YELLOW, RED, RESET
 from .hint_extract import format_extract
 
@@ -113,6 +113,7 @@ class Report:
         out = "|  "
         out += f"{self.level.ansi_color_code()}{self.level.name}"
         out += f"{self.message}{RESET}\n"
-        out += f"@{self.item.relpath}\n"
-        out += "\n".join(format_extract(self.item.abspath, self.line, self.column))
+        if isinstance(self.item, FileItem):
+            out += f"@{self.item.relpath}\n"
+            out += "\n".join(format_extract(self.item.abspath, self.line, self.column))
         return out

@@ -40,6 +40,8 @@ class Linter:
 
     WEIGHT: int = 100
 
+    ItemType: Type[Item] = Item
+
     def should_check(self, item: Item) -> bool:
         """actually performs check to see if the linter should run on this item.
 
@@ -71,7 +73,7 @@ class Linter:
 
     def do_check(self, item: Item) -> Optional[Generator[Report, None, None]]:
         """runs lint, if `should_check` returns True, used internally"""
-        if self.should_check(item):
+        if isinstance(item, self.ItemType) and self.should_check(item):
             return self.check(item)
         return None
 
@@ -83,7 +85,9 @@ class Linter:
 class FileLinter(Linter):
     """ Specific linter that operates only on FileItems """
 
-    def check(self, item: FileItem) -> Generator[Report, None, None]:
+    ItemType: Type[Item] = FileItem
+
+    def check(self, item: Item) -> Generator[Report, None, None]:
         ...
 
 

@@ -89,6 +89,12 @@ class Classifier:
     classifier can leverage information provided (or omitted) by previous
     classifiers"""
 
+    ItemType: Type[Item] = Item
+
+    def do_classify(self, item: Item):
+        if isinstance(item, self.ItemType):
+            self.classify(item)
+
     def classify(self, item: Item):
         """abstract method to be implemented by subclass"""
         raise NotImplementedError()
@@ -97,8 +103,7 @@ class Classifier:
 class FileClassifier(Classifier):
     """Specialized classifer which operates on "FileItem"s"""
 
-    def classify(self, item: FileItem):
-        raise NotImplementedError
+    ItemType: Type[Item] = FileItem
 
 
 _CLASSIFIER_BASE_CLASSES: list[Type[Classifier]] = [Classifier, FileClassifier]
