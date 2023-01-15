@@ -22,7 +22,7 @@ code here provides ability to "classify" different files
 """
 
 from dataclasses import dataclass
-from typing import Generator, Iterable, Type
+from typing import Generator, Iterable, Type, cast
 
 
 @dataclass(frozen=True)
@@ -105,8 +105,25 @@ class FileClassifier(Classifier):
 
     ItemType: Type[Item] = FileItem
 
+class ExactPathClassifier(FileClassifier):
+    """Classifies an item which matches some exact path"""
 
-_CLASSIFIER_BASE_CLASSES: list[Type[Classifier]] = [Classifier, FileClassifier]
+    path: str
+    'exact path to match'
+
+    tags: list[str]
+    'exact tags to add to matched item'
+
+    def classify(self, item: Item):
+        item = cast(FileItem, item)
+        # item will definitely be subclass of
+        # cls.ItemType, just need to convince the type checker
+
+        if item.relpath == self.path:
+            item.add_tags(self, self.tags[:])
+
+_CLASSIFIER_BASE_CLASSES: list[Type[Classifier]] = [
+        Classifier, FileClassifier, ExactPathClassifier]
 _CLASSIFIERS: list[Type[Classifier]] = []
 
 

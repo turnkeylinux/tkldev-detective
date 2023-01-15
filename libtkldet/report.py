@@ -111,9 +111,9 @@ class Report:
     def format(self) -> str:
         """formats report for terminal output and returns as a string"""
         out = "|  "
-        out += f"{self.level.ansi_color_code()}{self.level.name}"
+        out += f"{self.level.ansi_color_code()}{self.level.name} "
         out += f"{self.message}{RESET}\n"
         if isinstance(self.item, FileItem):
-            out += f"@{self.item.relpath}\n"
+            out += f"@{self.item.relpath} +{self.line}\n"
             out += "\n".join(format_extract(self.item.abspath, self.line, self.column))
         return out

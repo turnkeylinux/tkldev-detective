@@ -2,8 +2,8 @@ import json
 from typing import Generator
 import subprocess
 
-from libtklint.linter import FileLinter, FileItem, register_linter
-from libtklint.report import Report, parse_report_level
+from libtkldet.linter import FileLinter, FileItem, register_linter
+from libtkldet.report import Report, parse_report_level
 
 
 @register_linter

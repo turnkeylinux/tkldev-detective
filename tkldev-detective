@@ -18,6 +18,7 @@
 from argparse import ArgumentParser
 from os.path import relpath, abspath
 from typing import Generator
+import sys
 
 from libtkldet import locator, modman, report
 import libtkldet
@@ -43,7 +44,13 @@ def perform_lint(root: str) -> Generator[report.Report, None, None]:
 
 if __name__ == "__main__":
     parser = ArgumentParser()
-    parser.add_argument("appliance", type=str)
+    subparsers = parser.add_subparsers(dest='action')
+
+    list_parser = subparsers.add_parser('list')
+    list_parser.add_argument('list_item',
+            choices=['linters', 'classifiers', 'all'])
+    lint_parser = subparsers.add_parser('lint')
+    lint_parser.add_argument('appliance')
 
     args = parser.parse_args()
 
@@ -52,6 +59,18 @@ if __name__ == "__main__":
     all_classifiers = libtkldet.classifier.get_weighted_classifiers()
     all_linters = libtkldet.linter.get_weighted_linters()
 
-    for report in perform_lint(args.appliance):
-        print("\n|   ".join(report.format().split("\n")))
-        print()
+    linters_by_name = { l.__class__.__name__: l for l in all_linters }
+    classifiers_by_name = { c.__class__.__name__: c for c in all_classifiers }
+
+    if args.action == 'list':
+        if args.list_item in ('linters', 'all'):
+            for item in all_linters:
+                print('linter', item.__class__.__name__)
+        if args.list_item in ('classifiers', 'all'):
+            for item in all_classifiers:
+                print('classifier', item.__class__.__name__)
+
+    elif args.action == 'lint':
+        for report in perform_lint(args.appliance):
+            print("\n|   ".join(report.format().split("\n")))
+            print()

@@ -21,10 +21,12 @@ import importlib.machinery
 import types
 from os.path import join, dirname, abspath, splitext, isfile
 from os import listdir
+import sys
 
+from .colors import BLACK, RESET, BOLD
 
 def _load_all_modules_from_dir(root: str):
-    print("load all modules from", root)
+    print(BLACK + BOLD + "load all modules from", root + RESET, file=sys.stderr)
     root = abspath(root)
     for filename in listdir(root):
         path = join(root, filename)
@@ -32,7 +34,7 @@ def _load_all_modules_from_dir(root: str):
         if isfile(path) and ext == ".py":
             loader = importlib.machinery.SourceFileLoader(mod_name, path)
             loader.exec_module(types.ModuleType(loader.name))
-            print("loaded", loader.name)
+            print(BLACK + BOLD + "loaded", loader.name + RESET, file=sys.stderr)
 
 
 def load_modules():

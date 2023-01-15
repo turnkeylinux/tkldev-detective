@@ -1,4 +1,4 @@
-from libtklint.classifier import FileClassifier, FileItem, register_classifier
+from libtkldet.classifier import FileClassifier, FileItem, register_classifier
 from os.path import splitext, isfile
 
 
