@@ -26,8 +26,9 @@ import libtkldet.classifier
 import libtkldet.linter
 
 
-def perform_lint(root: str) -> Generator[report.Report, None, None]:
-    for path in locator.locator(root):
+def perform_lint(path: str) -> Generator[report.Report, None, None]:
+    root = locator.get_appliance_root(path)
+    for path in locator.locator(path):
         item = libtkldet.classifier.FileItem(
             value=path,
             _tags={},

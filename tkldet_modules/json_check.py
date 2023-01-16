@@ -36,7 +36,7 @@ class JsonLinter(FileLinter):
                 yield Report(
                     item,
                     line=e.lineno,
-                    column=e.colno,
+                    column=e.colno-1,
                     location_metadata=None,
                     message=e.msg,
                     fix=None,
