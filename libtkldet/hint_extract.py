@@ -19,7 +19,7 @@
 Code for extracting parts of files and annotating them for visualizing lints
 """
 from typing import Union
-from .colors import RED, GREEN, RESET
+from . import colors as co
 
 H_PAD = 6 # padding (for hint lines to account for line numbers)
 
@@ -29,13 +29,13 @@ def extract_line(path: str, row: int) -> str:
         for (i, line) in enumerate(fob):
             line = line.rstrip()
             if i == row:
-                return str(i+1).rjust(4) + ': ' + GREEN + line + RESET
+                return str(i+1).rjust(4) + ': ' + co.GREEN + line + co.RESET
     return "<COULD NOT FIND LINE>"
 
 
 def extract_line_col(path: str, row: int, col: int) -> list[str]:
     """extract a single line from a file, but also point at a specific column"""
-    return [extract_line(path, row), RED + "^".rjust(col + H_PAD + 1) + RESET]
+    return [extract_line(path, row), co.RED + "^".rjust(col + H_PAD + 1) + co.RESET]
 
 
 def extract_line_cols(path: str, row: int, col_span: tuple[int, int]) -> list[str]:
@@ -43,7 +43,7 @@ def extract_line_cols(path: str, row: int, col_span: tuple[int, int]) -> list[st
     min_col, max_col = col_span
     return [
         extract_line(path, row),
-        RED + "^".rjust(min_col + H_PAD) + "-" * (max_col - min_col - 1) + "^" + RESET,
+        co.RED + "^".rjust(min_col + H_PAD) + "-" * (max_col - min_col - 1) + "^" + co.RESET,
     ]
 
 
@@ -55,9 +55,9 @@ def extract_lines(path: str, row_span: tuple[int, int]) -> list[str]:
         for (i, line) in enumerate(fob):
             line = line.rstrip()
             if i in (min_row, max_row):
-                out.append(RED + "> " + str(i+1).rjust(4) + ':' + GREEN + line + RESET)
+                out.append(co.RED + "> " + str(i+1).rjust(4) + ':' + co.GREEN + line + co.RESET)
             elif min_row < i < max_row:
-                out.append(RED + "| " + str(i+1).rjust(4) + ':' + GREEN + line + RESET)
+                out.append(co.RED + "| " + str(i+1).rjust(4) + ':' + co.GREEN + line + co.RESET)
     return out
 
 
@@ -72,20 +72,20 @@ def extract_lines_cols(
         for (i, line) in enumerate(fob):
             line = line.rstrip()
             if min_row <= i <= max_row:
-                out.append(str(i+1).rjust(4) + ':' + GREEN + line + RESET)
+                out.append(str(i+1).rjust(4) + ':' + co.GREEN + line + co.RESET)
             if i == min_row:
-                out.append(RED + "^".rjust(min_col + H_PAD) + RESET)
+                out.append(co.RED + "^".rjust(min_col + H_PAD) + co.RESET)
             elif i > min_row:
                 if i == max_row:
                     out.append(
-                        RED
+                        co.RED
                         + "+".rjust(min_col + H_PAD)
                         + "-" * (max_col - min_col - 1)
                         + "^"
-                        + RESET
+                        + co.RESET
                     )
                 else:
-                    out.append(RED + "|".rjust(min_col + H_PAD) + RESET)
+                    out.append(co.RED + "|".rjust(min_col + H_PAD) + co.RESET)
     return out
 
 

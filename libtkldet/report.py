@@ -23,7 +23,7 @@ import enum
 from typing import Union
 
 from .classifier import Item, FileItem
-from .colors import CYAN, YELLOW, RED, RESET
+from . import colors as co
 from .hint_extract import format_extract
 
 
@@ -38,13 +38,13 @@ class ReportLevel(Enum):
     def ansi_color_code(self) -> str:
         """returns an ansi escape code for color, for each level"""
         if self == self.INFO:
-            return CYAN
+            return co.CYAN
         if self == self.CONVENTION:
-            return CYAN
+            return co.CYAN
         if self == self.WARN:
-            return YELLOW
+            return co.YELLOW
         if self == self.ERROR:
-            return RED
+            return co.RED
         return ""
 
 
@@ -104,9 +104,9 @@ class Report:
         """formats report for terminal output and returns as a string"""
         out = "|  "
         out += f"{self.level.ansi_color_code()}{self.level.name} "
-        out += f"{self.message}{RESET}\n"
+        out += f"{self.message}{co.RESET}\n"
         if self.fix:
-            out += f"{CYAN}suggested fix: {self.fix}{RESET}\n"
+            out += f"{co.CYAN}suggested fix: {self.fix}{co.RESET}\n"
         return out
 
 @dataclass(frozen=True)
@@ -132,7 +132,7 @@ class FileReport(Report):
         """formats report for terminal output and returns as a string"""
         out = "|  "
         out += f"{self.level.ansi_color_code()}{self.level.name} "
-        out += f"{self.message}{RESET}\n"
+        out += f"{self.message}{co.RESET}\n"
         if isinstance(self.item, FileItem):
             if self.line:
                 out += f"@{self.item.relpath} +{self.line}\n"
@@ -141,5 +141,5 @@ class FileReport(Report):
             else:
                 out += f"@{self.item.relpath}\n"
             if self.fix:
-                out += f"{CYAN}suggested fix: {self.fix}{RESET}\n"
+                out += f"{co.CYAN}suggested fix: {self.fix}{co.RESET}\n"
         return out.rstrip()
