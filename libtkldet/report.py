@@ -72,8 +72,6 @@ class Report:
 
     __slots__ = [
         "item",
-        "line",
-        "column",
         "location_metadata",
         "message",
         "fix",
@@ -83,12 +81,6 @@ class Report:
 
     item: Item
     "metadata on location of issue (path, tags, etc.)"
-
-    line: Union[int, tuple[int, int]]
-    "line or (begin_line, end_line) issue occurs"
-
-    column: Union[int, tuple[int, int], None]
-    "column or (begin_column, end_column) issue occurs"
 
     location_metadata: Union[str, None]
     """
@@ -113,7 +105,41 @@ class Report:
         out = "|  "
         out += f"{self.level.ansi_color_code()}{self.level.name} "
         out += f"{self.message}{RESET}\n"
-        if isinstance(self.item, FileItem):
-            out += f"@{self.item.relpath} +{self.line}\n"
-            out += "\n".join(format_extract(self.item.abspath, self.line, self.column))
+        if self.fix:
+            out += f"{CYAN}suggested fix: {self.fix}{RESET}\n"
         return out
+
+@dataclass(frozen=True)
+class FileReport(Report):
+    """
+    Holds all information about a particular issue in a particular location
+    in a particular file possibly including metadata, possible fixes,
+    severity, which linter created the report, etc.
+    """
+
+    __slots__ = [
+        "line",
+        "column",
+    ]
+
+    line: Union[int, tuple[int, int], None]
+    "line or (begin_line, end_line) issue occurs"
+
+    column: Union[int, tuple[int, int], None]
+    "column or (begin_column, end_column) issue occurs"
+
+    def format(self) -> str:
+        """formats report for terminal output and returns as a string"""
+        out = "|  "
+        out += f"{self.level.ansi_color_code()}{self.level.name} "
+        out += f"{self.message}{RESET}\n"
+        if isinstance(self.item, FileItem):
+            if self.line:
+                out += f"@{self.item.relpath} +{self.line}\n"
+                out += "\n".join(format_extract(self.item.abspath, self.line,
+                    self.column)) + "\n"
+            else:
+                out += f"@{self.item.relpath}\n"
+            if self.fix:
+                out += f"{CYAN}suggested fix: {self.fix}{RESET}\n"
+        return out.rstrip()

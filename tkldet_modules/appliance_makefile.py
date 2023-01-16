@@ -16,16 +16,8 @@
 # tkldev-detective. If not, see <https://www.gnu.org/licenses/>.
 from typing import Generator
 
-from libtkldet.classifier import ExactPathClassifier, register_classifier
 from libtkldet.linter import FileLinter, register_linter, FileItem
-from libtkldet.report import Report, ReportLevel
-
-
-@register_classifier
-class ApplianceMakefileClassifier(ExactPathClassifier):
-    path: str = 'Makefile'
-    tags: list[str] = ['appliance-makefile']
-
+from libtkldet.report import Report, FileReport, ReportLevel
 
 @register_linter
 class ApplianceMakefileLinter(FileLinter):
@@ -45,10 +37,14 @@ class ApplianceMakefileLinter(FileLinter):
         with open(item.abspath, 'r') as fob:
             for i, line in enumerate(fob):
                 if in_define:
+                    # ignore matches inside define, might cause false
+                    # positives
                     if line.startswith("endef"):
                         in_define = False
                     continue
                 elif line.startswith('define'):
+                    # ignore matches inside define, might cause false
+                    # positives
                     in_define = True
                     continue
                 elif line.startswith('include'):
@@ -57,8 +53,8 @@ class ApplianceMakefileLinter(FileLinter):
                 elif '=' in line:
                     var = line.split('=')[0].strip()
                     if not var in MK_CONFVARS:
-                        yield Report(
-                            item,
+                        yield FileReport(
+                            item = item,
                             line = i+1,
                             column = (0, len(var)-1),
                             location_metadata = None,
@@ -69,8 +65,8 @@ class ApplianceMakefileLinter(FileLinter):
                             level = ReportLevel.WARN)
 
                     if first_include:
-                        yield Report(
-                            item,
+                        yield FileReport(
+                            item = item,
                             line = i+1,
                             column = line.find('='),
                             location_metadata = None,

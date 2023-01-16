@@ -23,7 +23,7 @@ code here provides ability to "classify" different files
 
 from dataclasses import dataclass
 from typing import Generator, Iterable, Type, cast
-from os.path import join, basename
+from os.path import dirname
 
 
 @dataclass(frozen=True)
@@ -56,6 +56,11 @@ class Item:
         if name not in self._tags:
             self._tags[name] = set()
         self._tags[name].update(tags)
+
+    def pretty_print(self):
+        print(f'{self.value}')
+        for src in self._tags:
+            print(src, self._tags[src])
 
 
 @dataclass(frozen=True)
@@ -145,7 +150,7 @@ class SubdirClassifier(FileClassifier):
                 # XXX doesn't handle any `..` in path, hopefully doesn't matter
                 item.add_tags(self, self.tags[:])
         else:
-            if join(self.path, basename(item.path)) == self.path:
+            if dirname(item.relpath) == self.path:
                 item.add_tags(self, self.tags[:])
 
 _CLASSIFIER_BASE_CLASSES: list[Type[Classifier]] = [

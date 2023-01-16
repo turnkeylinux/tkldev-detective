@@ -18,7 +18,7 @@ import yaml
 from typing import Generator
 
 from libtkldet.linter import FileLinter, FileItem, register_linter
-from libtkldet.report import Report, ReportLevel
+from libtkldet.report import Report, FileReport, ReportLevel
 
 
 @register_linter
@@ -34,8 +34,8 @@ class YamlLinter(FileLinter):
             try:
                 yaml.safe_load(fob)
             except yaml.parser.ParserError as e:
-                yield Report(
-                    item,
+                yield FileReport(
+                    item=item,
                     line=e.problem_mark.line,
                     column=e.problem_mark.column,
                     location_metadata=None,
@@ -45,8 +45,8 @@ class YamlLinter(FileLinter):
                     level=ReportLevel.ERROR
                 )
             except yaml.scanner.ScannerError as e:
-                yield Report(
-                    item,
+                yield FileReport(
+                    item=item,
                     line=e.problem_mark.line,
                     column=e.problem_mark.column,
                     location_metadata=None,

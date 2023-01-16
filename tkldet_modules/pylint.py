@@ -19,7 +19,7 @@ from typing import Generator
 import subprocess
 
 from libtkldet.linter import FileLinter, FileItem, register_linter
-from libtkldet.report import Report, parse_report_level
+from libtkldet.report import Report, FileReport, parse_report_level
 
 
 @register_linter
@@ -44,8 +44,8 @@ class PyLinter(FileLinter):
             else:
                 location_metadata = f'in base of module {report["module"]}'
 
-            yield Report(
-                item,
+            yield FileReport(
+                item=item,
                 line=report["line"],
                 column=report["column"],
                 location_metadata=location_metadata,

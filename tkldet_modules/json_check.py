@@ -18,7 +18,7 @@ import json
 from typing import Generator
 
 from libtkldet.linter import FileLinter, FileItem, register_linter
-from libtkldet.report import Report, ReportLevel
+from libtkldet.report import Report, FileReport, ReportLevel
 
 
 @register_linter
@@ -33,8 +33,8 @@ class JsonLinter(FileLinter):
             try:
                 json.load(fob)
             except json.decoder.JSONDecodeError as e:
-                yield Report(
-                    item,
+                yield FileReport(
+                    item=item,
                     line=e.lineno,
                     column=e.colno-1,
                     location_metadata=None,

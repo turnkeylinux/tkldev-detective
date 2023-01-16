@@ -19,7 +19,7 @@ from typing import Generator
 import subprocess
 
 from libtkldet.linter import FileLinter, FileItem, register_linter
-from libtkldet.report import Report, parse_report_level
+from libtkldet.report import Report, FileReport, parse_report_level
 
 
 @register_linter
@@ -41,8 +41,8 @@ class Shellcheck(FileLinter):
             ).stdout
         ):
 
-            yield Report(
-                item,
+            yield FileReport(
+                item=item,
                 line=(report["line"], report["endLine"]),
                 column=(report["column"], report["endColumn"]),
                 location_metadata="",
