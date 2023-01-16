@@ -23,6 +23,7 @@ code here provides ability to "classify" different files
 
 from dataclasses import dataclass
 from typing import Generator, Iterable, Type, cast
+from os.path import join, basename
 
 
 @dataclass(frozen=True)
@@ -121,6 +122,31 @@ class ExactPathClassifier(FileClassifier):
 
         if item.relpath == self.path:
             item.add_tags(self, self.tags[:])
+
+class SubdirClassifier(FileClassifier):
+    '''Classifies an item which is inside a given subdirectory'''
+
+    path: str
+    'the parent directory'
+
+    recursive: bool
+    'whether to match a child of any depth or only files directly inside the given dir'
+
+    tags: list[str]
+    'exact tags to add to matched item'
+
+    def classify(self, item: Item):
+        item = cast(FileItem, item)
+        # item will definitely be subclass of
+        # cls.ItemType, just need to convince the type checker
+
+        if self.recursive:
+            if item.relpath.startswith(self.path):
+                # XXX doesn't handle any `..` in path, hopefully doesn't matter
+                item.add_tags(self, self.tags[:])
+        else:
+            if join(self.path, basename(item.path)) == self.path:
+                item.add_tags(self, self.tags[:])
 
 _CLASSIFIER_BASE_CLASSES: list[Type[Classifier]] = [
         Classifier, FileClassifier, ExactPathClassifier]

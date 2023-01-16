@@ -17,13 +17,54 @@
 
 """locates files to be classified and eventually linted"""
 
-from os.path import join
+from os.path import join, normpath, basename, isdir
 from glob import iglob
 
 from typing import Generator
 
+from .error import ApplianceNotFound
+
+PRODUCTS_DIR = "/turnkey/fab/products"
+
+
+def is_appliance_path(path: str):
+    """ is path, a path to an appliance? """
+    path = normpath(path)
+    if path == join(PRODUCTS_DIR, basename(path)):
+        return True
+    return False
+
+
+def is_appliance_name(name: str):
+    """ is name, the name of an existing appliance on tkldev? """
+    return "/" not in name and isdir(join(PRODUCTS_DIR, name))
+
+
+def is_inside_appliance(path: str):
+    """ is path, a path to a file inside an appliance """
+    path = normpath(path)
+    if not path.startswith(PRODUCTS_DIR + "/"):
+        return False
+    path = path[len(PRODUCTS_DIR) + 1 :]
+    return bool(path)  # if path is non-zero length, it must be a path into an appliance
+
 
 def locator(root: str) -> Generator[str, None, None]:
+    """yields (pretty much) every file in an appliance of potential concern
+    or a specific file only if given a path to a file inside an appliance"""
+    if is_appliance_name(root):
+        yield from full_appliance_locator(join(PRODUCTS_DIR, root))
+    elif is_appliance_path(root):
+        yield from full_appliance_locator(root)
+    elif is_inside_appliance(root):
+        yield root
+    else:
+        raise ApplianceNotFound(
+            "input does not appear to be an appliance name, path to an appliance or path to a file inside of an appliance"
+        )
+
+
+def full_appliance_locator(root: str) -> Generator[str, None, None]:
     """yields (pretty much) every file in an appliance of potential concern"""
     yield from map(
         lambda x: join(root, x), ["Makefile", "changelog", "README.rst", "removelist"]
