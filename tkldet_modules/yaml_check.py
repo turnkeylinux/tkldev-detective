@@ -1,4 +1,4 @@
-# Copyright (c) Turnkey GNU/Linux <admin@turnkeylinux.org> 
+# Copyright (c) Turnkey GNU/Linux <admin@turnkeylinux.org>
 #
 # this file is part of tkldev-detective.
 #
@@ -23,14 +23,11 @@ from libtkldet.report import Report, FileReport, ReportLevel
 
 @register_linter
 class YamlLinter(FileLinter):
-    ENABLE_TAGS: set[str] = {
-        "ext:yaml",
-        "ext:yml"
-    }
+    ENABLE_TAGS: set[str] = {"ext:yaml", "ext:yml"}
     DISABLE_TAGS: set[str] = set()
 
     def check(self, item: FileItem) -> Generator[Report, None, None]:
-        with open(item.abspath, 'r') as fob:
+        with open(item.abspath, "r") as fob:
             try:
                 yaml.safe_load(fob)
             except yaml.parser.ParserError as e:
@@ -39,10 +36,10 @@ class YamlLinter(FileLinter):
                     line=e.problem_mark.line,
                     column=e.problem_mark.column,
                     location_metadata=None,
-                    message=f'{e.context} {e.problem}',
+                    message=f"{e.context} {e.problem}",
                     fix=None,
-                    source='yaml_check',
-                    level=ReportLevel.ERROR
+                    source="yaml_check",
+                    level=ReportLevel.ERROR,
                 )
             except yaml.scanner.ScannerError as e:
                 yield FileReport(
@@ -50,8 +47,8 @@ class YamlLinter(FileLinter):
                     line=e.problem_mark.line,
                     column=e.problem_mark.column,
                     location_metadata=None,
-                    message=f'{e.context} {e.problem}',
+                    message=f"{e.context} {e.problem}",
                     fix=None,
-                    source='yaml_check',
-                    level=ReportLevel.ERROR
+                    source="yaml_check",
+                    level=ReportLevel.ERROR,
                 )

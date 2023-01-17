@@ -1,4 +1,4 @@
-# Copyright (c) Turnkey GNU/Linux <admin@turnkeylinux.org> 
+# Copyright (c) Turnkey GNU/Linux <admin@turnkeylinux.org>
 #
 # this file is part of tkldev-detective.
 #
@@ -24,19 +24,21 @@ from libtkldet.report import Report, FileReport, ReportLevel
 
 @register_linter
 class ApplianceConfDLinter(FileLinter):
-    ENABLE_TAGS: set[str] = { "appliance-conf.d" }
+    ENABLE_TAGS: set[str] = {"appliance-conf.d"}
     DISABLE_TAGS: set[str] = set()
 
     def check(self, item: FileItem) -> Generator[Report, None, None]:
         mode = os.lstat(item.abspath).st_mode
-        if not ((mode & stat.S_IXUSR) or (mode & stat.S_IXGRP) or (mode & stat.S_IXOTH)):
+        if not (
+            (mode & stat.S_IXUSR) or (mode & stat.S_IXGRP) or (mode & stat.S_IXOTH)
+        ):
             yield FileReport(
                 item=item,
                 line=None,
                 column=None,
                 location_metadata=None,
-                message=f'conf.d script isn\'t executable',
-                fix=f'`chmod +x {item.abspath}`',
-                source='confd linter',
-                level=ReportLevel.ERROR
+                message=f"conf.d script isn't executable",
+                fix=f"`chmod +x {item.abspath}`",
+                source="confd linter",
+                level=ReportLevel.ERROR,
             )

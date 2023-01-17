@@ -20,15 +20,16 @@ Utilities relating to classification/linting files
 """
 from typing import Optional
 
+
 def position_from_char_offset(path: str, offset: int) -> Optional[tuple[int, int]]:
     line = 0
     col = 0
-    with open(path, 'r') as fob:
+    with open(path, "r") as fob:
         for i, c in enumerate(fob.read()):
             if i == offset:
                 return line, col
 
-            if c == '\n':
+            if c == "\n":
                 line += 1
                 col = 0
             else:
@@ -39,12 +40,12 @@ def position_from_char_offset(path: str, offset: int) -> Optional[tuple[int, int
 def position_from_byte_offset(path: str, offset: int) -> Optional[tuple[int, int]]:
     line = 0
     col = 0
-    with open(path, 'rb') as fob:
+    with open(path, "rb") as fob:
         for i, c in enumerate(fob.read()):
             if i == offset:
                 return line, col
 
-            if c == b'\n':
+            if c == b"\n":
                 line += 1
                 col = 0
             else:

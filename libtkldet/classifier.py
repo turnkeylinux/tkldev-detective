@@ -58,7 +58,7 @@ class Item:
         self._tags[name].update(tags)
 
     def pretty_print(self):
-        print(f'{self.value}')
+        print(f"{self.value}")
         for src in self._tags:
             print(src, self._tags[src])
 
@@ -111,14 +111,15 @@ class FileClassifier(Classifier):
 
     ItemType: Type[Item] = FileItem
 
+
 class ExactPathClassifier(FileClassifier):
     """Classifies an item which matches some exact path"""
 
     path: str
-    'exact path to match'
+    "exact path to match"
 
     tags: list[str]
-    'exact tags to add to matched item'
+    "exact tags to add to matched item"
 
     def classify(self, item: Item):
         item = cast(FileItem, item)
@@ -128,17 +129,18 @@ class ExactPathClassifier(FileClassifier):
         if item.relpath == self.path:
             item.add_tags(self, self.tags[:])
 
+
 class SubdirClassifier(FileClassifier):
-    '''Classifies an item which is inside a given subdirectory'''
+    """Classifies an item which is inside a given subdirectory"""
 
     path: str
-    'the parent directory'
+    "the parent directory"
 
     recursive: bool
-    'whether to match a child of any depth or only files directly inside the given dir'
+    "whether to match a child of any depth or only files directly inside the given dir"
 
     tags: list[str]
-    'exact tags to add to matched item'
+    "exact tags to add to matched item"
 
     def classify(self, item: Item):
         item = cast(FileItem, item)
@@ -153,6 +155,7 @@ class SubdirClassifier(FileClassifier):
             if dirname(item.relpath) == self.path:
                 item.add_tags(self, self.tags[:])
 
+
 _CLASSIFIERS: list[Type[Classifier]] = []
 
 
@@ -165,5 +168,6 @@ def register_classifier(classifier: Type[Classifier]):
 
 def get_weighted_classifiers() -> list[Classifier]:
     """returns instances of registered classifiers in order of weight"""
-    return sorted(map(lambda x: x(), _CLASSIFIERS), key=lambda x: (x.WEIGHT,
-        x.__class__.__name__))
+    return sorted(
+        map(lambda x: x(), _CLASSIFIERS), key=lambda x: (x.WEIGHT, x.__class__.__name__)
+    )

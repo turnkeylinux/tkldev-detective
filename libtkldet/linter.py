@@ -103,5 +103,6 @@ def register_linter(linter: Type[Linter]):
 
 def get_weighted_linters() -> list[Linter]:
     """returnss instances of registered classifiers in order of weight"""
-    return sorted(map(lambda x: x(), _LINTERS), key=lambda x: (x.WEIGHT,
-        x.__class__.__name__))
+    return sorted(
+        map(lambda x: x(), _LINTERS), key=lambda x: (x.WEIGHT, x.__class__.__name__)
+    )

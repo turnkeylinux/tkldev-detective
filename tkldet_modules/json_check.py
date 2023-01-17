@@ -1,4 +1,4 @@
-# Copyright (c) Turnkey GNU/Linux <admin@turnkeylinux.org> 
+# Copyright (c) Turnkey GNU/Linux <admin@turnkeylinux.org>
 #
 # this file is part of tkldev-detective.
 #
@@ -29,17 +29,17 @@ class JsonLinter(FileLinter):
     DISABLE_TAGS: set[str] = set()
 
     def check(self, item: FileItem) -> Generator[Report, None, None]:
-        with open(item.abspath, 'r') as fob:
+        with open(item.abspath, "r") as fob:
             try:
                 json.load(fob)
             except json.decoder.JSONDecodeError as e:
                 yield FileReport(
                     item=item,
                     line=e.lineno,
-                    column=e.colno-1,
+                    column=e.colno - 1,
                     location_metadata=None,
                     message=e.msg,
                     fix=None,
-                    source='json_check',
-                    level=ReportLevel.ERROR
+                    source="json_check",
+                    level=ReportLevel.ERROR,
                 )

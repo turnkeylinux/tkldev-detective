@@ -1,4 +1,4 @@
-# Copyright (c) Turnkey GNU/Linux <admin@turnkeylinux.org> 
+# Copyright (c) Turnkey GNU/Linux <admin@turnkeylinux.org>
 #
 # this file is part of tkldev-detective.
 #

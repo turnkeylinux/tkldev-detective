@@ -109,6 +109,7 @@ class Report:
             out += f"{co.CYAN}suggested fix: {self.fix}{co.RESET}\n"
         return out
 
+
 @dataclass(frozen=True)
 class FileReport(Report):
     """
@@ -136,37 +137,45 @@ class FileReport(Report):
         if isinstance(self.item, FileItem):
             if self.line:
                 out += f"@{self.item.relpath} +{self.line}\n"
-                out += "\n".join(format_extract(self.item.abspath, self.line,
-                    self.column)) + "\n"
+                out += (
+                    "\n".join(format_extract(self.item.abspath, self.line, self.column))
+                    + "\n"
+                )
             else:
                 out += f"@{self.item.relpath}\n"
             if self.fix:
                 out += f"{co.CYAN}suggested fix: {self.fix}{co.RESET}\n"
         return out.rstrip()
 
+
 class ReportFilter:
-    '''Last stop before presenting to the user, report filters can modify,
-    split, generate or even remove reports'''
+    """Last stop before presenting to the user, report filters can modify,
+    split, generate or even remove reports"""
 
     WEIGHT: int = 100
 
     def filter(self, report: Report) -> Generator[Report, None, None]:
         yield report
 
+
 _FILTERS: list[Type[ReportFilter]] = []
 
+
 def register_filter(filter: Type[ReportFilter]):
-    '''registers a report filter for use in tkldev-detective, must be called on
-    all filters added'''
+    """registers a report filter for use in tkldev-detective, must be called on
+    all filters added"""
     _FILTERS.append(filter)
     return filter
 
+
 def get_weighted_filters() -> list[ReportFilter]:
-    return sorted(map(lambda x: x(), _FILTERS), key=lambda x: (x.WEIGHT,
-        x.__class__.__name__))
+    return sorted(
+        map(lambda x: x(), _FILTERS), key=lambda x: (x.WEIGHT, x.__class__.__name__)
+    )
+
 
 def filter_all_reports(reports: Iterable[Report]) -> Generator[Report, None, None]:
-    '''filters all reports through all filters in order of weight'''
+    """filters all reports through all filters in order of weight"""
     filters = get_weighted_filters()
 
     for report in reports:

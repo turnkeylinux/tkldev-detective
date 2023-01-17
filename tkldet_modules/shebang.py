@@ -1,4 +1,4 @@
-# Copyright (c) Turnkey GNU/Linux <admin@turnkeylinux.org> 
+# Copyright (c) Turnkey GNU/Linux <admin@turnkeylinux.org>
 #
 # this file is part of tkldev-detective.
 #
@@ -25,11 +25,11 @@ class ShebangClassifier(FileClassifier):
     def classify(self, item: FileItem):
         if isfile(item.abspath):
             with open(item.abspath, "rb") as fob:
-                shebang = b''
+                shebang = b""
                 head = fob.read(512)
 
-                if b'\n' in head:
-                    shebang = head.split(b'\n')[0].strip()
+                if b"\n" in head:
+                    shebang = head.split(b"\n")[0].strip()
                     if shebang:
                         shebang = shebang.split()[0].strip()
             shebang = str(shebang)
