@@ -91,18 +91,17 @@ class FileLinter(Linter):
         ...
 
 
-_LINTER_BASE_CLASSES: list[Type[Linter]] = [Linter, FileLinter]
 _LINTERS: list[Type[Linter]] = []
 
 
 def register_linter(linter: Type[Linter]):
     """registers a linter for use in tkldev-detective, must be called on all
     linters added"""
-    if linter in _LINTER_BASE_CLASSES:
-        raise ValueError(f"linter {linter!r} is a base class!")
     _LINTERS.append(linter)
+    return linter
 
 
 def get_weighted_linters() -> list[Linter]:
     """returnss instances of registered classifiers in order of weight"""
-    return sorted(map(lambda x: x(), _LINTERS), key=lambda x: x.WEIGHT)
+    return sorted(map(lambda x: x(), _LINTERS), key=lambda x: (x.WEIGHT,
+        x.__class__.__name__))

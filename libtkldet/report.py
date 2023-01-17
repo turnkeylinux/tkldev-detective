@@ -20,7 +20,7 @@ produced by "Linter"s"""
 from dataclasses import dataclass
 from enum import Enum
 import enum
-from typing import Union
+from typing import Union, Generator, Type, Iterable, TypeVar
 
 from .classifier import Item, FileItem
 from . import colors as co
@@ -143,3 +143,38 @@ class FileReport(Report):
             if self.fix:
                 out += f"{co.CYAN}suggested fix: {self.fix}{co.RESET}\n"
         return out.rstrip()
+
+class ReportFilter:
+    '''Last stop before presenting to the user, report filters can modify,
+    split, generate or even remove reports'''
+
+    WEIGHT: int = 100
+
+    def filter(self, report: Report) -> Generator[Report, None, None]:
+        yield report
+
+_FILTERS: list[Type[ReportFilter]] = []
+
+def register_filter(filter: Type[ReportFilter]):
+    '''registers a report filter for use in tkldev-detective, must be called on
+    all filters added'''
+    _FILTERS.append(filter)
+    return filter
+
+def get_weighted_filters() -> list[ReportFilter]:
+    return sorted(map(lambda x: x(), _FILTERS), key=lambda x: (x.WEIGHT,
+        x.__class__.__name__))
+
+def filter_all_reports(reports: Iterable[Report]) -> Generator[Report, None, None]:
+    '''filters all reports through all filters in order of weight'''
+    filters = get_weighted_filters()
+
+    for report in reports:
+        reports_curr = [report]
+        reports_next = []
+        for filt in filters:
+            for c_report in reports_curr:
+                reports_next.extend(filt.filter(c_report))
+            reports_curr = reports_next
+            reports_next = []
+        yield from reports_curr

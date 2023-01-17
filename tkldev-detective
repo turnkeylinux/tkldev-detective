@@ -25,7 +25,10 @@ import libtkldet
 import libtkldet.classifier
 import libtkldet.linter
 
-def perform_lint(path: str, dump_tags: bool, skip_lint: bool) -> Generator[report.Report, None, None]:
+
+def perform_lint(
+    path: str, dump_tags: bool, skip_lint: bool
+) -> Generator[report.Report, None, None]:
     root = locator.get_appliance_root(path)
     for path in locator.locator(path):
         item = libtkldet.classifier.FileItem(
@@ -47,22 +50,23 @@ def perform_lint(path: str, dump_tags: bool, skip_lint: bool) -> Generator[repor
 
 if __name__ == "__main__":
     parser = ArgumentParser()
-    parser.add_argument('--color', choices=['always', 'never', 'auto'],
-            default='auto')
+    parser.add_argument("--color", choices=["always", "never", "auto"], default="auto")
     subparsers = parser.add_subparsers(dest="action")
 
     list_parser = subparsers.add_parser("list")
     list_parser.add_argument("list_item", choices=["linters", "classifiers", "all"])
     lint_parser = subparsers.add_parser("lint")
     lint_parser.add_argument(
-        '-t', '--dump-tags',
-        action='store_true',
-        help='show tags for each file before linting'
+        "-t",
+        "--dump-tags",
+        action="store_true",
+        help="show tags for each file before linting",
     )
     lint_parser.add_argument(
-        '-s', '--skip-lint',
-        action='store_true',
-        help='don\'t actually perform lint, only classification'
+        "-s",
+        "--skip-lint",
+        action="store_true",
+        help="don't actually perform lint, only classification",
     )
     lint_parser.add_argument(
         "target",
@@ -71,10 +75,10 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    if args.color == 'auto':
+    if args.color == "auto":
         colors.set_colors_enabled(sys.stdout.isatty())
     else:
-        colors.set_colors_enabled(args.color == 'always')
+        colors.set_colors_enabled(args.color == "always")
 
     modman.load_modules()
 
@@ -93,6 +97,8 @@ if __name__ == "__main__":
                 print("classifier", item.__class__.__name__)
 
     elif args.action == "lint":
-        for report in perform_lint(args.target, args.dump_tags, args.skip_lint):
+        for report in report.filter_all_reports(
+            perform_lint(args.target, args.dump_tags, args.skip_lint)
+        ):
             print("\n|   ".join(report.format().split("\n")))
             print()

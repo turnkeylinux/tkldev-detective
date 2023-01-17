@@ -153,20 +153,17 @@ class SubdirClassifier(FileClassifier):
             if dirname(item.relpath) == self.path:
                 item.add_tags(self, self.tags[:])
 
-_CLASSIFIER_BASE_CLASSES: list[Type[Classifier]] = [
-        Classifier, FileClassifier, ExactPathClassifier]
 _CLASSIFIERS: list[Type[Classifier]] = []
 
 
 def register_classifier(classifier: Type[Classifier]):
     """registers a classifier for use in tkldev-detective, must be called on all
     classifiers added"""
-    if classifier in _CLASSIFIER_BASE_CLASSES:
-        raise ValueError(f"classifier {classifier!r} is a base class!")
     _CLASSIFIERS.append(classifier)
     return classifier
 
 
 def get_weighted_classifiers() -> list[Classifier]:
     """returns instances of registered classifiers in order of weight"""
-    return sorted(map(lambda x: x(), _CLASSIFIERS), key=lambda x: x.WEIGHT)
+    return sorted(map(lambda x: x(), _CLASSIFIERS), key=lambda x: (x.WEIGHT,
+        x.__class__.__name__))
