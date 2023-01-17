@@ -22,14 +22,17 @@ from typing import Optional
 
 
 def position_from_char_offset(path: str, offset: int) -> Optional[tuple[int, int]]:
+    '''given an offset into a file (decodes), returns the line and column numbers
+    respectively, expressed as a tuple. If offset is invalid (such as too large
+    for file) None is returned'''
     line = 0
     col = 0
     with open(path, "r") as fob:
-        for i, c in enumerate(fob.read()):
+        for i, char in enumerate(fob.read()):
             if i == offset:
                 return line, col
 
-            if c == "\n":
+            if char == "\n":
                 line += 1
                 col = 0
             else:
@@ -38,14 +41,17 @@ def position_from_char_offset(path: str, offset: int) -> Optional[tuple[int, int
 
 
 def position_from_byte_offset(path: str, offset: int) -> Optional[tuple[int, int]]:
+    '''given an offset into a file (raw), returns the line and column numbers
+    respectively, expressed as a tuple. If offset is invalid (such as too large
+    for file) None is returned'''
     line = 0
     col = 0
     with open(path, "rb") as fob:
-        for i, c in enumerate(fob.read()):
+        for i, char in enumerate(fob.read()):
             if i == offset:
                 return line, col
 
-            if c == b"\n":
+            if char == b"\n":
                 line += 1
                 col = 0
             else:

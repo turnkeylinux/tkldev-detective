@@ -23,7 +23,6 @@ from glob import iglob
 from typing import Generator
 
 from .error import ApplianceNotFound
-from .classifier import FileItem
 
 PRODUCTS_DIR = "/turnkey/fab/products"
 
@@ -55,16 +54,16 @@ def get_appliance_root(path: str) -> str:
     return absolute path to the appliance"""
     if is_appliance_name(path):
         return join(PRODUCTS_DIR, path)
-    elif is_appliance_path(path):
+    if is_appliance_path(path):
         return normpath(path)
-    elif is_inside_appliance(path):
+    if is_inside_appliance(path):
         path = path[len(PRODUCTS_DIR) + 1 :]
         appliance_name = path.split("/", 1)[0]
         return join(PRODUCTS_DIR, appliance_name)
-    else:
-        raise ApplianceNotFound(
-            "input does not appear to be an appliance name, path to an appliance or path to a file inside of an appliance"
-        )
+    raise ApplianceNotFound(
+        "input does not appear to be an appliance name, path to an appliance"
+        " or path to a file inside of an appliance"
+    )
 
 
 def locator(root: str) -> Generator[str, None, None]:
@@ -78,7 +77,8 @@ def locator(root: str) -> Generator[str, None, None]:
         yield root
     else:
         raise ApplianceNotFound(
-            "input does not appear to be an appliance name, path to an appliance or path to a file inside of an appliance"
+            "input does not appear to be an appliance name, path to an"
+            " appliance or path to a file inside of an appliance"
         )
 
 

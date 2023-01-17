@@ -20,7 +20,7 @@ produced by "Linter"s"""
 from dataclasses import dataclass
 from enum import Enum
 import enum
-from typing import Union, Generator, Type, Iterable, TypeVar
+from typing import Union, Generator, Type, Iterable
 
 from .classifier import Item, FileItem
 from . import colors as co
@@ -155,20 +155,29 @@ class ReportFilter:
     WEIGHT: int = 100
 
     def filter(self, report: Report) -> Generator[Report, None, None]:
-        yield report
+        '''given a report filter or modify it
+
+        there doesn't need to be a 1-1 relationship between inputs and outputs
+
+        reports will be given to this function, and the reports it yields will
+        be fed to all remaining filters, after all processing they will be
+        presented to the user
+        '''
+        raise NotImplementedError()
 
 
 _FILTERS: list[Type[ReportFilter]] = []
 
 
-def register_filter(filter: Type[ReportFilter]):
+def register_filter(filt: Type[ReportFilter]):
     """registers a report filter for use in tkldev-detective, must be called on
     all filters added"""
-    _FILTERS.append(filter)
-    return filter
+    _FILTERS.append(filt)
+    return filt
 
 
 def get_weighted_filters() -> list[ReportFilter]:
+    """returns instances of registered filterss in order of weight"""
     return sorted(
         map(lambda x: x(), _FILTERS), key=lambda x: (x.WEIGHT, x.__class__.__name__)
     )

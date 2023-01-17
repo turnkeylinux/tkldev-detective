@@ -58,6 +58,7 @@ class Item:
         self._tags[name].update(tags)
 
     def pretty_print(self):
+        '''show item value as well as tags'''
         print(f"{self.value}")
         for src in self._tags:
             print(src, self._tags[src])

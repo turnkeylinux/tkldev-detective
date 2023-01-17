@@ -14,7 +14,9 @@
 #
 # You should have received a copy of the GNU General Public License along with
 # tkldev-detective. If not, see <https://www.gnu.org/licenses/>.
-
+'''used to hold custom errors/exceptions for internal use'''
 
 class ApplianceNotFound(Exception):
+    '''appliance was not found for some reason (likely path/app name was
+    incorrect)'''
     ...

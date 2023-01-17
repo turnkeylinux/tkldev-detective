@@ -79,7 +79,7 @@ class Linter:
 
     def check(self, item: Item) -> Generator[Report, None, None]:
         """abstract method, actually runs lint, to be implemented by subclass"""
-        ...
+        raise NotImplementedError()
 
 
 class FileLinter(Linter):
@@ -88,7 +88,7 @@ class FileLinter(Linter):
     ItemType: Type[Item] = FileItem
 
     def check(self, item: Item) -> Generator[Report, None, None]:
-        ...
+        raise NotImplementedError()
 
 
 _LINTERS: list[Type[Linter]] = []

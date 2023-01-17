@@ -61,8 +61,28 @@ _COLOR_ASCII_CODES = dict(
 
 _COLOR_GLOBALS = globals()
 
+BLACK: str
+RED: str
+GREEN: str
+YELLOW: str
+BLUE: str
+MAGENTA: str
+CYAN: str
+WHITE: str
+BRIGHT_BLACK: str
+BRIGHT_RED: str
+BRIGHT_GREEN: str
+BRIGHT_YELLOW: str
+BRIGHT_BLUE: str
+BRIGHT_MAGENTA: str
+BRIGHT_CYAN: str
+BRIGHT_WHITE: str
+RESET: str
+BOLD: str
 
 def set_colors_enabled(enabled: bool):
+    '''sets color globals to ANSI color codes if `enabled` otherwise sets them
+    to empty strings'''
     for color in _COLORS:
         if enabled:
             _COLOR_GLOBALS[color] = _COLOR_ASCII_CODES[color]
