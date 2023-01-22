@@ -30,6 +30,7 @@ def perform_lint(
     path: str, dump_tags: bool, skip_lint: bool
 ) -> Generator[report.Report, None, None]:
     root = locator.get_appliance_root(path)
+
     for path in locator.locator(path):
         item = libtkldet.classifier.FileItem(
             value=path,

@@ -32,6 +32,7 @@ class ReportLevel(Enum):
 
     INFO = enum.auto()
     CONVENTION = enum.auto()
+    REFACTOR = enum.auto()
     WARN = enum.auto()
     ERROR = enum.auto()
 
@@ -41,6 +42,8 @@ class ReportLevel(Enum):
             return co.CYAN
         if self == self.CONVENTION:
             return co.CYAN
+        if self == self.REFACTOR:
+            return co.YELLOW
         if self == self.WARN:
             return co.YELLOW
         if self == self.ERROR:
@@ -55,6 +58,8 @@ def parse_report_level(raw: str) -> ReportLevel:
         return ReportLevel.INFO
     if raw in ("c", "convention"):
         return ReportLevel.CONVENTION
+    if raw in ("r", "refactor"):
+        return ReportLevel.REFACTOR
     if raw in ("w", "warn", "warning"):
         return ReportLevel.WARN
     if raw in ("e", "err", "error", "fatal", "critical"):
@@ -155,14 +160,14 @@ class ReportFilter:
     WEIGHT: int = 100
 
     def filter(self, report: Report) -> Generator[Report, None, None]:
-        '''given a report filter or modify it
+        """given a report filter or modify it
 
         there doesn't need to be a 1-1 relationship between inputs and outputs
 
         reports will be given to this function, and the reports it yields will
         be fed to all remaining filters, after all processing they will be
         presented to the user
-        '''
+        """
         raise NotImplementedError()
 
 
