@@ -81,6 +81,20 @@ class FileItem(Item):
     """absolute path to file, use this when inspecting the file the path points
     to"""
 
+@dataclass(frozen=True)
+class PackageItem(Item):
+    """Specifically packages installed via plan which can be classied
+
+    value is the package name
+    """
+
+    __slots__ = ["plan_stack"]
+
+    plan_stack: list[str]
+    """a list of paths, in order from the "base" plan (appliance-specific) all
+    the way to the exact plan that included this package. Note this will only
+    contain 1 value if a package was included in the appliance specific plan"""
+
 
 class Classifier:
     """Classifier base class
@@ -112,6 +126,10 @@ class FileClassifier(Classifier):
 
     ItemType: Type[Item] = FileItem
 
+class PackageClassifier(Classifier):
+    """Specialized classifier which operates on "PackageItem"s"""
+
+    ItemType: Type[Item] = PackageItem
 
 class ExactPathClassifier(FileClassifier):
     """Classifies an item which matches some exact path"""

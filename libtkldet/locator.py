@@ -87,6 +87,14 @@ def full_appliance_locator(root: str) -> Generator[str, None, None]:
     yield from map(
         lambda x: join(root, x), ["Makefile", "changelog", "README.rst", "removelist"]
     )
+    yield from iter_conf(root)
+    yield from iter_plan(root)
+    yield from iter_overlay(root)
+
+def iter_conf(root: str) -> Generator[str, None, None]:
     yield from iglob(join(root, "conf.d/*"))
+def iter_plan(root: str) -> Generator[str, None, None]:
     yield from iglob(join(root, "plan/*"))
+def iter_overlay(root: str) -> Generator[str, None, None]:
     yield from iglob(join(root, "overlay/**"), recursive=True)
+

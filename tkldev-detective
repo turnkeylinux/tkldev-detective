@@ -25,10 +25,11 @@ import libtkldet
 import libtkldet.classifier
 import libtkldet.linter
 
-
 def perform_lint(
     path: str, dump_tags: bool, skip_lint: bool
 ) -> Generator[report.Report, None, None]:
+    libtkldet.initialize(path)
+
     root = locator.get_appliance_root(path)
 
     for path in locator.locator(path):

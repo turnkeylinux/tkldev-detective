@@ -16,7 +16,10 @@
 # tkldev-detective. If not, see <https://www.gnu.org/licenses/>.
 
 """tools to extract variable definitions from makefiles, purpose built for
-tkldev, so ignores tests & definitions"""
+fab tool-chain on tkldev, so ignores tests & definitions, butchers most
+functions, doesn't understand targets, makes more unspoken assumptions and probably
+produces a lot of other erroneous output (if used for general makefile parsing)
+"""
 from typing import Optional
 from dataclasses import dataclass
 import os
@@ -38,6 +41,12 @@ def parse_assignment(line: str) -> Optional[tuple[str, str, str]]:
             return name.strip(), operator, value.strip()
     return None
 
+@dataclass
+class CommonFabBuildData:
+    overlays: list[str]
+    conf: list[str]
+    removelists: list[str]
+    removelists_final: list[str]
 
 @dataclass
 class MakefileData:
@@ -68,11 +77,23 @@ class MakefileData:
                     self.variables[name].extend(self.resolve_var(value))
         elif operator in ("=", ":="):
             # set unconditionally (these are semantically different operations)
+            if name not in self.variables:
+                self.variables[name] = []
             for value in value.split():
                 self.variables[name].extend(self.resolve_var(value))
         else:
             raise ValueError(f"unknown operator {operator!r}")
 
+    def __getitem__(self, key: str) -> list[str]:
+        return self.variables[key]
+
+    def to_fab_data(self) -> CommonFabBuildData:
+        return CommonFabBuildData(
+            overlays = [*self['COMMON_OVERLAYS']],
+            conf = [*self['COMMON_CONF']],
+            removelists = [*self['COMMON_REMOVELISTS']],
+            removelists_final = [*self['COMMON_REMOVELISTS_FINAL']]
+        )
 
 def parse_makefile(
     path: str, makefile_data: Optional[MakefileData] = None

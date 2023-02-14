@@ -56,5 +56,6 @@ class PyLinter(FileLinter):
                 ),
                 fix=None,
                 source="pylint",
+                raw=report,
                 level=parse_report_level(report["type"]),
             )

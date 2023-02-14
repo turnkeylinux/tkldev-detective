@@ -18,6 +18,7 @@ from typing import Generator
 
 from libtkldet.linter import FileLinter, register_linter, FileItem
 from libtkldet.report import Report, FileReport, ReportLevel
+from libtkldet.fuzzy import fuzzy_suggest
 
 
 @register_linter
@@ -54,14 +55,19 @@ class ApplianceMakefileLinter(FileLinter):
                 elif "=" in line:
                     var = line.split("=")[0].strip()
                     if not var in MK_CONFVARS:
+                        suggested_var = fuzzy_suggest(var, MK_CONFVARS)
+                        if suggested_var:
+                            fix = f'did you mean {suggested_var!r}?'
+                        else:
+                            fix = f"either replace with one of {MK_CONFVARS} or add it to"
+                            " turnkey.mk's list of valid CONF_VARS",
                         yield FileReport(
                             item=item,
                             line=i + 1,
                             column=(0, len(var) - 1),
                             location_metadata=None,
+                            fix=fix,
                             message="variable set is not a known CONF_VAR",
-                            fix="either replace with one of {} or add it to"
-                            "turnkey.mk's list of valid CONF_VARS",
                             source="appliance-makefile-linter",
                             level=ReportLevel.WARN,
                         )

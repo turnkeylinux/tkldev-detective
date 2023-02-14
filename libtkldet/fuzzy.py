@@ -15,22 +15,23 @@
 # You should have received a copy of the GNU General Public License along with
 # tkldev-detective. If not, see <https://www.gnu.org/licenses/>.
 
-from . import locator, common_data, classifier
-from .common_data import APPLIANCE_ROOT
-from typing import Generator
+from typing import Optional
 
-def initialize(path: str):
-    root = locator.get_appliance_root(path)
-    common_data.initialize_common_data(root)
+MAX_DIFF = 3
+'words that differ more than MAX_DIFF will not be suggested'
 
-def yield_appliance_items() -> Generator[classifier.Item, None, None]:
-    from os.path import relpath, abspath
+def fuzzy_diff(a: str, b: str) -> int:
+    diff = 0
+    for i in range(max(len(a), len(b))):
+        if len(a) <= i or len(b) <= i:
+            diff += 1
+        else:
+            diff += (a[i] != b[i])
+    return diff
 
-    yield from common_data.iter_packages()
-    for path in locator.locator(APPLIANCE_ROOT):
-        yield classifier.FileItem(
-            value = path,
-            _tags = {},
-            relpath = relpath(path, start=APPLIANCE_ROOT),
-            abspath=abspath(path)
-        )
+def fuzzy_suggest(check: str, options: list[str]) -> Optional[str]:
+    weighted_options = [(word, fuzzy_diff(check, word)) for word in options]
+    weighted_options = sorted(weighted_options, key=lambda x: x[1])
+    if weighted_options[0][1] > MAX_DIFF:
+        return None
+    return weighted_options[0][0]

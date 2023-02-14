@@ -18,6 +18,7 @@
 """Encapsulates "reports", these are issues, warnings or notes about "Item"s
 produced by "Linter"s"""
 from dataclasses import dataclass
+import dataclasses
 from enum import Enum
 import enum
 from typing import Union, Generator, Type, Iterable
@@ -105,6 +106,25 @@ class Report:
     level: ReportLevel
     "error, warning, etc."
 
+    raw: Union[dict, None] = None
+    "raw data, format depends on `source`, not guaranteed to be set"
+
+    def to_dict(self) -> dict:
+        return {
+            'item': self.item,
+            'location_metadata': self.location_metadata,
+            'message': self.message,
+            'fix': self.fix,
+            'source': self.source,
+            'level': self.level,
+            'raw': self.raw
+        }
+
+    def modified(self, **kwargs) -> 'Report':
+        data = self.to_dict()
+        data.update(kwargs)
+        return self.__class__(**data)
+
     def format(self) -> str:
         """formats report for terminal output and returns as a string"""
         out = "|  "
@@ -123,15 +143,10 @@ class FileReport(Report):
     severity, which linter created the report, etc.
     """
 
-    __slots__ = [
-        "line",
-        "column",
-    ]
-
-    line: Union[int, tuple[int, int], None]
+    line: Union[int, tuple[int, int], None] = None
     "line or (begin_line, end_line) issue occurs"
 
-    column: Union[int, tuple[int, int], None]
+    column: Union[int, tuple[int, int], None] = None
     "column or (begin_column, end_column) issue occurs"
 
     def format(self) -> str:
@@ -151,6 +166,19 @@ class FileReport(Report):
             if self.fix:
                 out += f"{co.CYAN}suggested fix: {self.fix}{co.RESET}\n"
         return out.rstrip()
+
+    def to_dict(self) -> dict:
+        return {
+            'item': self.item,
+            'location_metadata': self.location_metadata,
+            'message': self.message,
+            'fix': self.fix,
+            'source': self.source,
+            'level': self.level,
+            'raw': self.raw,
+            'line': self.line,
+            'column': self.column
+        }
 
 
 class ReportFilter:
