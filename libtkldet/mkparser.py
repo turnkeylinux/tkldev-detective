@@ -43,6 +43,8 @@ def parse_assignment(line: str) -> Optional[tuple[str, str, str]]:
 
 @dataclass
 class CommonFabBuildData:
+    'holds lists of paths of each component type included from common'
+
     overlays: list[str]
     conf: list[str]
     removelists: list[str]

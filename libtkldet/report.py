@@ -18,7 +18,6 @@
 """Encapsulates "reports", these are issues, warnings or notes about "Item"s
 produced by "Linter"s"""
 from dataclasses import dataclass
-import dataclasses
 from enum import Enum
 import enum
 from typing import Union, Generator, Type, Iterable
