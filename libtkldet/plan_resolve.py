@@ -15,27 +15,25 @@
 # You should have received a copy of the GNU General Public License along with
 # tkldev-detective. If not, see <https://www.gnu.org/licenses/>.
 
+"""very naive cpp parser for plan parsing"""
+
 from os.path import join, isfile
 from dataclasses import dataclass
 from typing import Optional
-import os
 from .error import PlanNotFound, UnknownPlanDirective, InvalidPlan
 
-static_vars = {
-    'KERNEL': '',
-    'DEBIAN': '',
-    'AMD64': ''
-}
+static_vars = {"KERNEL": "", "DEBIAN": "", "AMD64": ""}
+
 
 @dataclass
 class PlanEntry:
-    '''A single package entry in a plan'''
+    """A single package entry in a plan"""
 
     package_name: str
-    '''name of a package references in a plan'''
+    """name of a package references in a plan"""
 
     include_stack: list[str]
-    '''path to each plan in the hierarchy of includes that resulted in this
+    """path to each plan in the hierarchy of includes that resulted in this
     package being installed.
 
     ``include_stack[0]`` is the highest level plan being processed
@@ -44,59 +42,62 @@ class PlanEntry:
     ``include_stack[-1]`` is the file this specific package was found in.
     (either the ``plan/main`` or a file it's included at some point during the
     build process, such as ``${FAB_PATH}/common/plans/turnkey/mysql``)
-    '''
+    """
 
     def get_plan_path(self) -> str:
-        '''path to plan file which contains this package'''
+        """path to plan file which contains this package"""
         return self.include_stack[-1]
 
-def _include_plan(name: str, include_paths: list[str], plan_stack: list[str]) -> list[PlanEntry]:
+
+def _include_plan(
+    name: str, include_paths: list[str], plan_stack: list[str]
+) -> list[PlanEntry]:
     for path in include_paths:
         if isfile(join(path, name)):
             return _parse_plan(join(path, name), include_paths, plan_stack)
     raise PlanNotFound(name)
 
-def _remove_multiline_comments(raw: str) -> str:
-    '''
-    removes multiline cpp comments (in the form /* I'm a comment */)
-    '''
 
-    out = ''
+def _remove_multiline_comments(raw: str) -> str:
+    """
+    removes multiline cpp comments (in the form /* I'm a comment */)
+    """
+
+    out = ""
     comment_depth = 0
     comment_begun = False
 
-    for c in raw:
+    for char in raw:
         if comment_depth > 0:
             if comment_begun:
-                if c == '/':
+                if char == "/":
                     comment_depth -= 1
                 comment_begun = False
-            elif c == '*':
+            elif char == "*":
                 comment_begun = True
 
         else:
             if comment_begun:
-                if c == '*':
+                if char == "*":
                     comment_depth += 1
                 else:
-                    out += '/' + c
+                    out += "/" + char
                 comment_begun = False
-            elif c == '/':
+            elif char == "/":
                 comment_begun = True
             else:
-                out += c
+                out += char
 
     return out
 
+
 def _parse_plan(
-    path: str,
-    include_paths: list[str],
-    plan_stack: Optional[list[str]] = None
+    path: str, include_paths: list[str], plan_stack: Optional[list[str]] = None
 ) -> list[PlanEntry]:
-    '''Parse a plan (uses cpp, but notably does not use *most* cpp
+    """Parse a plan (uses cpp, but notably does not use *most* cpp
     functionality).
 
-    This code will not work on *most* cpp related projects'''
+    This code will not work on *most* cpp related projects"""
 
     if plan_stack is None:
         plan_stack = [path]
@@ -110,82 +111,68 @@ def _parse_plan(
     #
     # number of items in the stack is how many "if statements" deep we are
     # (a length of 4, would indicate we're 4 "if statements" deep)
-    # 
+    #
     # the boolean value at a given position in the stack indicates if the check
     # is "true".
     cond_stack: list[bool] = []
 
-    with open(path, 'r') as fob:
+    with open(path, "r") as fob:
         data = _remove_multiline_comments(fob.read())
 
     for line in data.splitlines():
         # remove single line comment
-        if '//' in line:
-            line = line.split('//', 1)[0]
+        if "//" in line:
+            line = line.split("//", 1)[0]
         # honestly would've thought hashes in cpp code wouldn't work like this,
         # but apparently it does
-        if not line.startswith('#') and '#' in line:
-            line = line.split('#', 1)[0]
+        if not line.startswith("#") and "#" in line:
+            line = line.split("#", 1)[0]
 
         line = line.strip()
 
         if not line:
             continue
 
-        if line.startswith('#endif'):
+        if line.startswith("#endif"):
             if not cond_stack:
                 raise InvalidPlan(
-                        f'unbalanced #if* and #endif directives in plan {path}')
+                    f"unbalanced #if* and #endif directives in plan {path}"
+                )
             cond_stack.pop()
             continue
 
         if not cond_stack or cond_stack[-1]:
             # either we're not in a condition, or the current block's check
             # evaluated to True
-            if line.startswith('#ifdef'):
+            if line.startswith("#ifdef"):
                 check_var = line[6:].strip()
-                cond_stack.append(check_var in static_vars) 
-            elif line.startswith('#ifndef'):
+                cond_stack.append(check_var in static_vars)
+            elif line.startswith("#ifndef"):
                 check_var = line[6:].strip()
-                cond_stack.append(check_var not in static_vars) 
-            elif line.startswith('#else'):
+                cond_stack.append(check_var not in static_vars)
+            elif line.startswith("#else"):
                 assert cond_stack
                 cond_stack[-1] = not cond_stack[-1]
-            elif line.startswith('#include'):
-                packages.extend(_include_plan(
-                    line[8:].strip().strip('<>'),
-                    include_paths,
-                    plan_stack[:]
-                ))
-            elif line.startswith('#'):
+            elif line.startswith("#include"):
+                packages.extend(
+                    _include_plan(
+                        line[8:].strip().strip("<>"), include_paths, plan_stack[:]
+                    )
+                )
+            elif line.startswith("#"):
                 raise UnknownPlanDirective(line)
             else:
-                assert '=' not in line, "assumption broken: '=' in plan"
-                packages.append(PlanEntry(
-                    line.strip(),
-                    plan_stack[:]
-                ))
+                assert "=" not in line, "assumption broken: '=' in plan"
+                packages.append(PlanEntry(line.strip(), plan_stack[:]))
         else:
             # inside the branch we DON'T want to follow given a conditional
-            if line.startswith('#ifdef'):
+            if line.startswith("#ifdef"):
                 # any further conditions inside this should also be ignored
                 cond_stack.append(False)
             continue
     return packages
 
+
 def parse_plan(path: str) -> list[PlanEntry]:
-    return _parse_plan(path, [
-        '/turnkey/fab/common/plans'
-    ])
-
-
-if __name__ == '__main__':
-    from argparse import ArgumentParser 
-
-    parser = ArgumentParser()
-    parser.add_argument('plan')
-    args = parser.parse_args()
-    import json
-
-    for package in parse_plan(args.plan):
-        print(package)
+    """parse a plan and return a plan entry for each package """
+    return _parse_plan(path, ["/turnkey/fab/common/plans"])

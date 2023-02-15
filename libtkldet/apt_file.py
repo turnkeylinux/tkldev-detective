@@ -15,31 +15,44 @@
 # You should have received a copy of the GNU General Public License along with
 # tkldev-detective. If not, see <https://www.gnu.org/licenses/>.
 
+"""relates to finding packages based on files they provide, including those not
+installed"""
+
 import subprocess
-from typing import Optional
+
 
 def is_installed(package_name: str) -> bool:
-    '''check if a given package is installed on the HOST system (tkldev)'''
-    return b'installed' in subprocess.check_output([
-        'dpkg-query', '-W', "--showformat='${Status}'\n", package_name
-    ])
+    """check if a given package is installed on the HOST system (tkldev)"""
+    return b"installed" in subprocess.check_output(
+        ["dpkg-query", "-W", "--showformat='${Status}'\n", package_name]
+    )
 
-HAS_APT_FILE: bool = is_installed('apt-file')
 
-def find_package_by_file(path: str) -> Optional[str]:
-    out = subprocess.run(
-        [
-            "apt-file",
-            "search",
-            "--substring-match",
-            "--package-only",
-            path,
-        ],
-        capture_output=True,
-        text=True,
-    ).stdout.strip()
+HAS_APT_FILE: bool = is_installed("apt-file")
 
-    return out or None
 
-def find_python_package(package_name: str) -> Optional[str]:
+def find_package_by_file(path: str) -> list[str]:
+    """return a list of packages that provide a file at a given path"""
+    out = (
+        subprocess.run(
+            [
+                "apt-file",
+                "search",
+                "--substring-match",
+                "--package-only",
+                path,
+            ],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        .stdout.strip()
+        .splitlines()
+    )
+
+    return out
+
+
+def find_python_package(package_name: str) -> list[str]:
+    """return a list of packages that provide a given python module"""
     return find_package_by_file(f"/usr/lib/python3/dist-packages/{package_name}")

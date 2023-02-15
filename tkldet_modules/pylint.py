@@ -17,10 +17,12 @@
 import json
 from typing import Generator
 import subprocess
+from os.path import join, dirname, abspath
 
 from libtkldet.linter import FileLinter, FileItem, register_linter
 from libtkldet.report import Report, FileReport, parse_report_level
 
+rcfile = join(dirname(dirname(abspath(__file__))), 'pylint_rcfile')
 
 @register_linter
 class PyLinter(FileLinter):
@@ -35,7 +37,7 @@ class PyLinter(FileLinter):
     def check(self, item: FileItem) -> Generator[Report, None, None]:
         for report in json.loads(
             subprocess.run(
-                ["pylint", item.abspath, "-f", "json"], capture_output=True, text=True
+                ["pylint", item.abspath, "-f", "json", '--rcfile', rcfile], capture_output=True, text=True
             ).stdout
         ):
 

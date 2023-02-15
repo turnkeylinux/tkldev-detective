@@ -15,22 +15,26 @@
 # You should have received a copy of the GNU General Public License along with
 # tkldev-detective. If not, see <https://www.gnu.org/licenses/>.
 
+from typing import Generator
+from os.path import relpath, abspath
 from . import locator, common_data, classifier
 from .common_data import APPLIANCE_ROOT
-from typing import Generator
+
 
 def initialize(path: str):
+    """initialize everything, involves scraping makefiles, parsing plans, etc."""
     root = locator.get_appliance_root(path)
     common_data.initialize_common_data(root)
 
+
 def yield_appliance_items() -> Generator[classifier.Item, None, None]:
-    from os.path import relpath, abspath
+    '''generator that yields everything "lintable"'''
 
     yield from common_data.iter_packages()
     for path in locator.locator(APPLIANCE_ROOT):
         yield classifier.FileItem(
-            value = path,
-            _tags = {},
-            relpath = relpath(path, start=APPLIANCE_ROOT),
-            abspath=abspath(path)
+            value=path,
+            _tags={},
+            relpath=relpath(path, start=APPLIANCE_ROOT),
+            abspath=abspath(path),
         )

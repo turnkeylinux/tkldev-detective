@@ -91,10 +91,17 @@ def full_appliance_locator(root: str) -> Generator[str, None, None]:
     yield from iter_plan(root)
     yield from iter_overlay(root)
 
-def iter_conf(root: str) -> Generator[str, None, None]:
-    yield from iglob(join(root, "conf.d/*"))
-def iter_plan(root: str) -> Generator[str, None, None]:
-    yield from iglob(join(root, "plan/*"))
-def iter_overlay(root: str) -> Generator[str, None, None]:
-    yield from iglob(join(root, "overlay/**"), recursive=True)
 
+def iter_conf(root: str) -> Generator[str, None, None]:
+    """ yield each conf file in the appliance """
+    yield from iglob(join(root, "conf.d/*"))
+
+
+def iter_plan(root: str) -> Generator[str, None, None]:
+    """ yield each plan file in the appliance """
+    yield from iglob(join(root, "plan/*"))
+
+
+def iter_overlay(root: str) -> Generator[str, None, None]:
+    """ yield each file in the appliance overlay"""
+    yield from iglob(join(root, "overlay/**"), recursive=True)

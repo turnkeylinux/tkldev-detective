@@ -22,9 +22,9 @@ from typing import Optional
 
 
 def position_from_char_offset(path: str, offset: int) -> Optional[tuple[int, int]]:
-    '''given an offset into a file (decodes), returns the line and column numbers
+    """given an offset into a file (decodes), returns the line and column numbers
     respectively, expressed as a tuple. If offset is invalid (such as too large
-    for file) None is returned'''
+    for file) None is returned"""
     line = 0
     col = 0
     with open(path, "r") as fob:
@@ -41,9 +41,9 @@ def position_from_char_offset(path: str, offset: int) -> Optional[tuple[int, int
 
 
 def position_from_byte_offset(path: str, offset: int) -> Optional[tuple[int, int]]:
-    '''given an offset into a file (raw), returns the line and column numbers
+    """given an offset into a file (raw), returns the line and column numbers
     respectively, expressed as a tuple. If offset is invalid (such as too large
-    for file) None is returned'''
+    for file) None is returned"""
     line = 0
     col = 0
     with open(path, "rb") as fob:

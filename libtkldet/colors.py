@@ -80,9 +80,10 @@ BRIGHT_WHITE: str
 RESET: str
 BOLD: str
 
+
 def set_colors_enabled(enabled: bool):
-    '''sets color globals to ANSI color codes if `enabled` otherwise sets them
-    to empty strings'''
+    """sets color globals to ANSI color codes if `enabled` otherwise sets them
+    to empty strings"""
     for color in _COLORS:
         if enabled:
             _COLOR_GLOBALS[color] = _COLOR_ASCII_CODES[color]

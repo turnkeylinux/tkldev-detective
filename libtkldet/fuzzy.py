@@ -15,23 +15,33 @@
 # You should have received a copy of the GNU General Public License along with
 # tkldev-detective. If not, see <https://www.gnu.org/licenses/>.
 
+"""very basic fuzzy search"""
+
 from typing import Optional
 
 MAX_DIFF = 3
-'words that differ more than MAX_DIFF will not be suggested'
+"words that differ more than MAX_DIFF will not be suggested"
 
-def fuzzy_diff(a: str, b: str) -> int:
+
+def fuzzy_diff(x: str, y: str) -> int:
+    """given 2 string values, calculate a 'difference' between them, expressed
+    as an integer"""
     diff = 0
-    for i in range(max(len(a), len(b))):
-        if len(a) <= i or len(b) <= i:
+    for i in range(max(len(x), len(y))):
+        if len(x) <= i or len(y) <= i:
             diff += 1
         else:
-            diff += (a[i] != b[i])
+            diff += x[i] != y[i]
     return diff
 
-def fuzzy_suggest(check: str, options: list[str]) -> Optional[str]:
+
+def fuzzy_suggest(check: str, options: list[str], max_diff=MAX_DIFF) -> Optional[str]:
+    """given a 'check' value, and a list of valid options, find the option
+    closest to the 'check' value, given that it's 'difference' (calculated by
+    'fuzzy_diff' is less than or equal to max_diff
+    """
     weighted_options = [(word, fuzzy_diff(check, word)) for word in options]
     weighted_options = sorted(weighted_options, key=lambda x: x[1])
-    if weighted_options[0][1] > MAX_DIFF:
+    if weighted_options[0][1] > max_diff:
         return None
     return weighted_options[0][0]

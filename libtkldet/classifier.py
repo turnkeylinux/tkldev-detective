@@ -58,7 +58,7 @@ class Item:
         self._tags[name].update(tags)
 
     def pretty_print(self):
-        '''show item value as well as tags'''
+        """show item value as well as tags"""
         print(f"{self.value}")
         for src in self._tags:
             print(src, self._tags[src])
@@ -80,6 +80,7 @@ class FileItem(Item):
     abspath: str
     """absolute path to file, use this when inspecting the file the path points
     to"""
+
 
 @dataclass(frozen=True)
 class PackageItem(Item):
@@ -113,6 +114,8 @@ class Classifier:
     ItemType: Type[Item] = Item
 
     def do_classify(self, item: Item):
+        """actually perform a classification so long as the concrete item type
+        is compatible with this classifier"""
         if isinstance(item, self.ItemType):
             self.classify(item)
 
@@ -126,10 +129,12 @@ class FileClassifier(Classifier):
 
     ItemType: Type[Item] = FileItem
 
+
 class PackageClassifier(Classifier):
     """Specialized classifier which operates on "PackageItem"s"""
 
     ItemType: Type[Item] = PackageItem
+
 
 class ExactPathClassifier(FileClassifier):
     """Classifies an item which matches some exact path"""

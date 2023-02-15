@@ -14,22 +14,30 @@
 #
 # You should have received a copy of the GNU General Public License along with
 # tkldev-detective. If not, see <https://www.gnu.org/licenses/>.
-'''used to hold custom errors/exceptions for internal use'''
+"""used to hold custom errors/exceptions for internal use"""
+
 
 class ApplianceNotFound(Exception):
-    '''appliance was not found for some reason (likely path/app name was
-    incorrect)'''
+    """appliance was not found for some reason (likely path/app name was
+    incorrect)"""
+
     ...
+
 
 class PlanNotFound(Exception):
-    '''a plan could not be included (likely include name is incorrect)'''
+    """a plan could not be included (likely include name is incorrect)"""
+
     ...
+
 
 class UnknownPlanDirective(Exception):
-    '''encountered some unexpected cpp directive in plan'''
+    """encountered some unexpected cpp directive in plan"""
+
     ...
 
+
 class InvalidPlan(Exception):
-    '''plan appears to not be valid (mismatched #if* and #endif directives
-    likely)'''
+    """plan appears to not be valid (mismatched #if* and #endif directives
+    likely)"""
+
     ...

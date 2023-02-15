@@ -25,6 +25,7 @@ import libtkldet
 import libtkldet.classifier
 import libtkldet.linter
 
+
 def perform_lint(
     path: str, dump_tags: bool, skip_lint: bool
 ) -> Generator[report.Report, None, None]:

@@ -41,14 +41,16 @@ def parse_assignment(line: str) -> Optional[tuple[str, str, str]]:
             return name.strip(), operator, value.strip()
     return None
 
+
 @dataclass
 class CommonFabBuildData:
-    'holds lists of paths of each component type included from common'
+    "holds lists of paths of each component type included from common"
 
     overlays: list[str]
     conf: list[str]
     removelists: list[str]
     removelists_final: list[str]
+
 
 @dataclass
 class MakefileData:
@@ -57,6 +59,7 @@ class MakefileData:
     variables: dict[str, list[str]]
 
     def resolve_var(self, value: str) -> list[str]:
+        """expand make variables, env variables and split into multiple values"""
         if value.startswith("$(") and value.endswith(")"):
             var_name = value[2:-1]
             if var_name in MAKEFILE_ENV:
@@ -64,24 +67,25 @@ class MakefileData:
             return self.variables.get(var_name, [])
         return value.split()
 
-    def assign_var(self, name: str, operator: str, value: str):
+    def assign_var(self, name: str, operator: str, values: str):
+        """process a variable assignment"""
         if operator == "+=":
             # add to existing definition
             if name not in self.variables:
                 self.variables[name] = []
-            for value in value.split():
+            for value in values.split():
                 self.variables[name].extend(self.resolve_var(value))
         elif operator == "?=":
             # set only if not already set
             if name not in self.variables:
                 self.variables[name] = []
-                for value in value.split():
+                for value in values.split():
                     self.variables[name].extend(self.resolve_var(value))
         elif operator in ("=", ":="):
             # set unconditionally (these are semantically different operations)
             if name not in self.variables:
                 self.variables[name] = []
-            for value in value.split():
+            for value in values.split():
                 self.variables[name].extend(self.resolve_var(value))
         else:
             raise ValueError(f"unknown operator {operator!r}")
@@ -90,16 +94,22 @@ class MakefileData:
         return self.variables[key]
 
     def to_fab_data(self) -> CommonFabBuildData:
+        """return just the high level data relating to included overlays, conf
+        and removelists"""
         return CommonFabBuildData(
-            overlays = [*self['COMMON_OVERLAYS']],
-            conf = [*self['COMMON_CONF']],
-            removelists = [*self['COMMON_REMOVELISTS']],
-            removelists_final = [*self['COMMON_REMOVELISTS_FINAL']]
+            overlays=[*self["COMMON_OVERLAYS"]],
+            conf=[*self["COMMON_CONF"]],
+            removelists=[*self["COMMON_REMOVELISTS"]],
+            removelists_final=[*self["COMMON_REMOVELISTS_FINAL"]],
         )
+
 
 def parse_makefile(
     path: str, makefile_data: Optional[MakefileData] = None
 ) -> MakefileData:
+    """attempts to naively get all variables defined in makefile tree. This
+    function is recursive and makefile_data is used when including other
+    makefiles"""
     if makefile_data is None:
         makefile_data = MakefileData({})
 
@@ -125,6 +135,7 @@ def parse_makefile(
                 in_define = True
                 continue
             if line.startswith("if"):
+                in_if = True
                 continue
             if line[0].isspace():
                 continue

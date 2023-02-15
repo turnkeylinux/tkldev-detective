@@ -109,17 +109,20 @@ class Report:
     "raw data, format depends on `source`, not guaranteed to be set"
 
     def to_dict(self) -> dict:
+        """ return this object as dictionary """
         return {
-            'item': self.item,
-            'location_metadata': self.location_metadata,
-            'message': self.message,
-            'fix': self.fix,
-            'source': self.source,
-            'level': self.level,
-            'raw': self.raw
+            "item": self.item,
+            "location_metadata": self.location_metadata,
+            "message": self.message,
+            "fix": self.fix,
+            "source": self.source,
+            "level": self.level,
+            "raw": self.raw,
         }
 
-    def modified(self, **kwargs) -> 'Report':
+    def modified(self, **kwargs) -> "Report":
+        """return a copy of this report with fields specified in
+        `kwargs` replacing fields from this report"""
         data = self.to_dict()
         data.update(kwargs)
         return self.__class__(**data)
@@ -168,15 +171,15 @@ class FileReport(Report):
 
     def to_dict(self) -> dict:
         return {
-            'item': self.item,
-            'location_metadata': self.location_metadata,
-            'message': self.message,
-            'fix': self.fix,
-            'source': self.source,
-            'level': self.level,
-            'raw': self.raw,
-            'line': self.line,
-            'column': self.column
+            "item": self.item,
+            "location_metadata": self.location_metadata,
+            "message": self.message,
+            "fix": self.fix,
+            "source": self.source,
+            "level": self.level,
+            "raw": self.raw,
+            "line": self.line,
+            "column": self.column,
         }
 
 
