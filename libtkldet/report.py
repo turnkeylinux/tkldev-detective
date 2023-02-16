@@ -21,6 +21,7 @@ from dataclasses import dataclass
 from enum import Enum
 import enum
 from typing import Union, Generator, Type, Iterable
+import textwrap
 
 from .classifier import Item, FileItem
 from . import colors as co
@@ -127,12 +128,20 @@ class Report:
         data.update(kwargs)
         return self.__class__(**data)
 
-    def format(self) -> str:
+    def format(self, suggested_fix: bool = True) -> str:
         """formats report for terminal output and returns as a string"""
         out = "|  "
         out += f"{self.level.ansi_color_code()}{self.level.name} "
-        out += f"{self.message}{co.RESET}\n"
-        if self.fix:
+
+        lpad = len(self.level.name)
+        wrapped_lines = textwrap.wrap(
+            self.message, 70 - lpad, subsequent_indent=" " * lpad
+        )
+        for line in wrapped_lines:
+            out += self.level.ansi_color_code() + line + co.RESET + "\n"
+
+        # out += f"{self.message}{co.RESET}\n"
+        if self.fix and suggested_fix:
             out += f"{co.CYAN}suggested fix: {self.fix}{co.RESET}\n"
         return out
 
@@ -151,11 +160,9 @@ class FileReport(Report):
     column: Union[int, tuple[int, int], None] = None
     "column or (begin_column, end_column) issue occurs"
 
-    def format(self) -> str:
+    def format(self, suggested_fix: bool = True) -> str:
         """formats report for terminal output and returns as a string"""
-        out = "|  "
-        out += f"{self.level.ansi_color_code()}{self.level.name} "
-        out += f"{self.message}{co.RESET}\n"
+        out = super().format(False)
         if isinstance(self.item, FileItem):
             if self.line:
                 out += f"@{self.item.relpath} +{self.line}\n"
@@ -165,7 +172,7 @@ class FileReport(Report):
                 )
             else:
                 out += f"@{self.item.relpath}\n"
-            if self.fix:
+            if self.fix and suggested_fix:
                 out += f"{co.CYAN}suggested fix: {self.fix}{co.RESET}\n"
         return out.rstrip()
 

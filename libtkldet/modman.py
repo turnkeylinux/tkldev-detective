@@ -18,6 +18,7 @@
 """ handles loading / managing tkldev-detective-modules """
 
 import importlib.machinery
+import importlib.util
 import types
 from os.path import join, dirname, abspath, splitext, isfile
 from os import listdir
@@ -35,11 +36,13 @@ def _load_all_modules_from_dir(root: str):
         path = join(root, filename)
         mod_name, ext = splitext(filename)
         if isfile(path) and ext == ".py":
-            loader = importlib.machinery.SourceFileLoader(mod_name, path)
-            loader.exec_module(types.ModuleType(loader.name))
-            print(
-                co.BLACK + co.BOLD + "loaded", loader.name + co.RESET, file=sys.stderr
-            )
+            spec = importlib.util.spec_from_file_location(mod_name, path)
+            assert spec is not None
+            module = importlib.util.module_from_spec(spec)
+            assert spec.loader is not None
+            spec.loader.exec_module(module)
+
+            print(co.BLACK + co.BOLD + "loaded", spec.name + co.RESET, file=sys.stderr)
 
 
 def load_modules():
