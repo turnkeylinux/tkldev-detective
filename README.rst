@@ -8,9 +8,11 @@ and provides a unified output format/interface for utilizing these tools.
 Dependencies
 ~~~~~~~~~~~~
 
-tkldev-detective has no mandatory dependencies
+Mandatory Dependencies:
 
-Currently though there is 1 optional dependency:
+    apt_file - for figuring out what packages provide certain files
+
+Optional Dependencies:
 
     pyyaml - enables yaml lint
 
