@@ -37,16 +37,20 @@ Usage
 -----
 
 Using ``tkldev-detective`` is as simple as running
-``tkldev-detective lint <appliance>`` where ``<appliance>`` can be the name of
-an appliance or the path to an appliance, provided you have the appliance
-build-code present on your tkldev.
+``tkldev-detective lint <appliance>`` where ``<appliance>`` can be:
+
+- the name of an appliance
+- the path to an appliance
+- the path to a specific file in an appliance
+
+All of this provided you have the given appliance's build code on your machine.
 
 E.g.
 
 ``tkldev-detective lint zoneminder``
 
 For more information on how it works and how to develop more functionality, see
-`overview`_ and `custom modules`_
+`overview`_, `custom modules`_ and `tools and tricks.rst`_
 
 Copyright
 ---------
@@ -61,3 +65,4 @@ You should have received a copy of the GNU General Public License along with tkl
 
 .. _overview: ./docs/overview.rst
 .. _custom modules: ./docs/custom_modules.rst
+.. _tools and tricks: ./docs/tools_and_tricks.rst

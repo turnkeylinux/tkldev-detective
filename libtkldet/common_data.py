@@ -89,7 +89,8 @@ def get_common_removelists_final() -> list[str]:
 
 def get_path_in_common_overlay(path: str) -> Optional[str]:
     """check if a given path (expressed as an absolute path, where it would be
-    placed in a build)"""
+    placed in a build) is included in build, if so the path to the file/dir IN
+    the common overlay is returned. Otherwise None is returned."""
     path = path.lstrip("/")
     for common in _FAB_DATA.overlays:
         common_path = join(

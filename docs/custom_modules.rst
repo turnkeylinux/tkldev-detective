@@ -8,8 +8,6 @@ subclass ``FileClassifier`` or ``FileLinter`` residing inside of the
 (Non-file classifiers and linters might be possible but are not yet
 officially supported)
 
-XXX ReportFilters are also possible to subclass once fully implemented
-
 Common Notes
 ------------
 
@@ -169,3 +167,47 @@ If the logic surrounding ``ENABLE_TAGS`` and ``DISABLE_TAGS`` is insufficient to
 determine if the linter should run you can override ``Linter.should_check``
 method which actually performs those checks it takes the ``Item`` as an argument
 and returns a boolean indicating if the linter should check the item.
+
+Custom Filters
+--------------
+
+ReportFilters or just Filters for short are generally less complex than linters
+but once again follow a similar pattern to Linters and Classifiers.
+
+Filters can suppress, modify or even produce multiple reports for any given
+report, however one very important thing to keep in mind however is that a
+filter that yields nothing, filters EVERY report (no reports are shown to
+the user).
+
+Below is a simple example that turns pylint "unused variable" warning reports
+into errors.
+
+.. code-block:: python3
+
+    from typing import Generator
+    from libtkldet.report import (
+        Report, ReportLevel, register_filter, ReportFilter,
+        FileReport
+    )
+
+    @register_filter
+    class UnusedVariableFilter(ReportFilter):
+        def filter(self, report: Report) -> Generator[Report, None, None]
+            if isinstance(report, FileReport) and report.source == 'pylint':
+                # all reports from pylint are FileReports, we're checking
+                # here more to convince the type-checker than anything else.
+
+                if report.raw["message-id"] == "W0612":
+                    # report.raw here is the raw JSON output from pylint
+                    # the specific value of `report.raw` depends on what
+                    # produced the report.
+
+                    # message-id refers to code's pylint uses to identify a
+                    # specific lint, here specifically "unused-variable"
+
+                    return report.modified(level = ReportLevel.ERROR)
+                    # report.modified(**kwargs) creates a copy of the report
+                    # with any field specified in kwargs replacing the
+                    # original
+
+            yield report

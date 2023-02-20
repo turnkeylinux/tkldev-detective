@@ -63,6 +63,5 @@ ReportFilter
     the "ReportFilter" is the last stop for reports before they are presented
     to the user. A ``ReportFilter`` is mostly intended to remove false
     positives but can also be used to add additional context to reports in a
-    way that might not make sense in the linter itself.
-
-    XXX: currently report filters are untested
+    way that might not make sense in the linter itself or even to modify reports
+    completely if necessary.
