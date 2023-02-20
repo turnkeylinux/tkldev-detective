@@ -27,11 +27,15 @@ from .classifier import Item, FileItem
 from . import colors as co
 from .hint_extract import format_extract
 
+
 @dataclass
 class Replacement:
+    ''' Holds replacement data, a list of replacements in form provided by
+    shellcheck '''
     begin_line: int
     end_line: int
     replacement: list[str]
+
 
 class ReportLevel(Enum):
     """represents a "level" of report, from information through hard issues"""
@@ -179,9 +183,17 @@ class FileReport(Report):
                 out += f"@{self.item.relpath}\n"
             if self.fix and suggested_fix:
                 if isinstance(self.fix, Replacement):
-                    out += f'{co.CYAN}replace with:{co.RESET}\n'
+                    out += f"{co.CYAN}replace with:{co.RESET}\n"
                     for i, line in enumerate(self.fix.replacement):
-                        out += str(i + self.fix.begin_line + 1).rjust(4) + ": "+ co.BOLD + co.BRIGHT_YELLOW + line + co.RESET + '\n'
+                        out += (
+                            str(i + self.fix.begin_line + 1).rjust(4)
+                            + ": "
+                            + co.BOLD
+                            + co.BRIGHT_YELLOW
+                            + line
+                            + co.RESET
+                            + "\n"
+                        )
                 else:
                     out += f"{co.CYAN}suggested fix: {self.fix}{co.RESET}\n"
         return out.rstrip()

@@ -108,8 +108,13 @@ if __name__ == "__main__":
                 print("\n|   ".join(report.format().split("\n")))
                 print()
         except libtkldet.error.PlanNotFound as e:
-            print(colors.RED + "error: " + colors.RESET +
-                "unable to find required plan: " + e.args[0])
+            print(
+                colors.RED
+                + "error: "
+                + colors.RESET
+                + "unable to find required plan: "
+                + e.args[0]
+            )
             sys.exit(1)
         except libtkldet.error.TKLDevDetectiveError as e:
             print(colors.RED + "error: " + colors.RESET + e.args[0])

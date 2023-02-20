@@ -44,24 +44,28 @@ def find_package_by_file(path: str) -> list[str]:
         ],
         capture_output=True,
         text=True,
+        check=True
     )
     if ret.returncode != 0:
         return []
-    else:
-        return ret.stdout.strip().splitlines()
+    return ret.stdout.strip().splitlines()
+
 
 def find_python_package(package_name: str) -> list[str]:
     """return a list of packages that provide a given python module"""
-    return find_package_by_file(f"/usr/lib/python3/dist-packages/{package_name}(\\.py)?")
+    return find_package_by_file(
+        f"/usr/lib/python3/dist-packages/{package_name}(\\.py)?"
+    )
+
 
 def find_python_package_from_import(module_str: str) -> list[str]:
     """return a list of packages that provide a given python import module, may
     be several modules deep (e.g. `foo.bar.baz`), attempts to find most
     specific python package provider
     """
-    out = find_python_package(module_str.replace('.', '/'))
-    while '.' in module_str and not out:
-        module_str = module_str.rsplit('.', 1)[0]
-        out = find_python_package(module_str.replace('.', '/'))
-    
+    out = find_python_package(module_str.replace(".", "/"))
+    while "." in module_str and not out:
+        module_str = module_str.rsplit(".", 1)[0]
+        out = find_python_package(module_str.replace(".", "/"))
+
     return out

@@ -19,7 +19,6 @@
 
 import importlib.machinery
 import importlib.util
-import types
 from os.path import join, dirname, abspath, splitext, isfile
 from os import listdir
 import sys

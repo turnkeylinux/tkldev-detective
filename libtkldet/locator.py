@@ -31,7 +31,7 @@ def is_appliance_path(path: str):
     """ is path, a path to an appliance? """
     path = normpath(path)
     if path == join(PRODUCTS_DIR, basename(path)):
-        return isfile(join(path, 'Makefile'))
+        return isfile(join(path, "Makefile"))
     return False
 
 
@@ -58,13 +58,13 @@ def get_appliance_root(path: str) -> str:
     if is_appliance_name(path):
         root = join(PRODUCTS_DIR, path)
     elif is_appliance_path(path):
-        root =  normpath(path)
+        root = normpath(path)
     elif is_inside_appliance(path):
         path = path[len(PRODUCTS_DIR) + 1 :]
         appliance_name = path.split("/", 1)[0]
         root = join(PRODUCTS_DIR, appliance_name)
 
-    if root is None or not isfile(join(root, 'Makefile')):
+    if root is None or not isfile(join(root, "Makefile")):
         raise ApplianceNotFound(
             "input does not appear to be an appliance name, path to an appliance"
             " or path to a file inside of an appliance"

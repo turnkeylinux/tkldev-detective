@@ -16,7 +16,9 @@
 # tkldev-detective. If not, see <https://www.gnu.org/licenses/>.
 """used to hold custom errors/exceptions for internal use"""
 
+
 class TKLDevDetectiveError(Exception):
+    '''Base class for tkldev-detective specific errors'''
     ...
 
 

@@ -53,16 +53,18 @@ class ApplianceMakefileLinter(FileLinter):
                     first_include = i
                     continue
                 elif "=" in line:
-                    if '+=' in line:
+                    if "+=" in line:
                         var = line.split("+=", 1)[0].strip()
                     else:
                         var = line.split("=", 1)[0].strip()
                     if not var in MK_CONFVARS:
                         suggested_var = fuzzy_suggest(var, MK_CONFVARS)
                         if suggested_var:
-                            fix = f'did you mean {suggested_var!r} instead of {var!r} ?'
+                            fix = f"did you mean {suggested_var!r} instead of {var!r} ?"
                         else:
-                            fix = f"either replace with one of {MK_CONFVARS} or add it to"
+                            fix = (
+                                f"either replace with one of {MK_CONFVARS} or add it to"
+                            )
                             " turnkey.mk's list of valid CONF_VARS",
                         yield FileReport(
                             item=item,
