@@ -27,6 +27,11 @@ from .classifier import Item, FileItem
 from . import colors as co
 from .hint_extract import format_extract
 
+@dataclass
+class Replacement:
+    begin_line: int
+    end_line: int
+    replacement: list[str]
 
 class ReportLevel(Enum):
     """represents a "level" of report, from information through hard issues"""
@@ -173,7 +178,12 @@ class FileReport(Report):
             else:
                 out += f"@{self.item.relpath}\n"
             if self.fix and suggested_fix:
-                out += f"{co.CYAN}suggested fix: {self.fix}{co.RESET}\n"
+                if isinstance(self.fix, Replacement):
+                    out += f'{co.CYAN}replace with:{co.RESET}\n'
+                    for i, line in enumerate(self.fix.replacement):
+                        out += str(i + self.fix.begin_line + 1).rjust(4) + ": "+ co.BOLD + co.BRIGHT_YELLOW + line + co.RESET + '\n'
+                else:
+                    out += f"{co.CYAN}suggested fix: {self.fix}{co.RESET}\n"
         return out.rstrip()
 
     def to_dict(self) -> dict:

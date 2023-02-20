@@ -137,6 +137,9 @@ def format_extract(
             return extract_lines(path, row_span)
         if isinstance(col_span, tuple):
             return extract_lines_cols(path, row_span, col_span)
+        if isinstance(col_span, int):
+            return extract_lines(path, row_span)
+    print(row_span, col_span)
     raise NotImplementedError(
         "some combination of 0/1/more rows/cols is not supported!"
     )

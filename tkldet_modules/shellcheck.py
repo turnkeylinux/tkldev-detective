@@ -19,8 +19,52 @@ from typing import Generator
 import subprocess
 
 from libtkldet.linter import FileLinter, FileItem, register_linter
-from libtkldet.report import Report, FileReport, parse_report_level
+from libtkldet.report import Report, FileReport, parse_report_level, Replacement
 
+def insert_str(v: str, i: int, instr: str):
+    return v[:i] + instr + v[i:]
+
+def expand_lines(lines: list[str]) -> Generator[str, None, None]:
+    for line in lines:
+        for subline in line.splitlines():
+            yield subline
+
+
+def format_replacement(
+        path: str,
+        line_span: tuple[int, int],
+        column_span: tuple[int, int],
+        replacements: list[dict]) -> Replacement:
+    start_line, end_line = line_span
+    start_col, end_col = column_span
+
+    start_line -= 1
+    end_line -= 1
+
+    lines = []
+
+    with open(path, 'r') as fob:
+        for i, line in enumerate(fob):
+            if i >= start_line and i <= end_line:
+                lines.append(line)
+
+    for replacement in replacements:
+        assert replacement['insertionPoint'] in ('beforeStart', 'afterEnd')
+
+        if replacement['insertionPoint'] == 'beforeStart':
+            line = replacement['line'] - start_line - 1
+            lines[line] = insert_str(
+                    lines[line],
+                    replacement['column'],
+                    replacement['replacement'])
+        elif replacement['insertionPoint'] == 'afterEnd':
+            line = replacement['endLine'] - start_line - 1
+            lines[line] = insert_str(
+                    lines[line],
+                    replacement['endColumn']-1,
+                    replacement['replacement'])
+    
+    return Replacement(start_line, end_line, expand_lines(lines))
 
 @register_linter
 class Shellcheck(FileLinter):
@@ -40,17 +84,33 @@ class Shellcheck(FileLinter):
                 text=True,
             ).stdout
         ):
+            if (report['column'] == report['endColumn']):
+                column = None
+            else:
+                column = (report['column'], report['endColumn']-1)
+
+            if (report['line'] == report['endLine']):
+                line = report['line']
+            else:
+                line = (report['line'], report['endLine'])
+
+            fix = report['fix']
+            if isinstance(report['fix'], dict):
+                fix = format_replacement(item.abspath,
+                        (report['line'], report['endLine']),
+                        (report['column'], report['endColumn']),
+                        fix['replacements'])
 
             yield FileReport(
                 item=item,
-                line=(report["line"], report["endLine"]),
-                column=(report["column"], report["endColumn"]),
+                line=line,
+                column=column,
                 location_metadata="",
                 message="[{}] {}".format(
                     report["code"],
                     report["message"],
                 ),
-                fix=report["fix"],
+                fix=fix,
                 source="shellcheck",
                 level=parse_report_level(report["level"]),
             )

@@ -16,27 +16,30 @@
 # tkldev-detective. If not, see <https://www.gnu.org/licenses/>.
 """used to hold custom errors/exceptions for internal use"""
 
+class TKLDevDetectiveError(Exception):
+    ...
 
-class ApplianceNotFound(Exception):
+
+class ApplianceNotFound(TKLDevDetectiveError):
     """appliance was not found for some reason (likely path/app name was
     incorrect)"""
 
     ...
 
 
-class PlanNotFound(Exception):
+class PlanNotFound(TKLDevDetectiveError):
     """a plan could not be included (likely include name is incorrect)"""
 
     ...
 
 
-class UnknownPlanDirective(Exception):
+class UnknownPlanDirective(TKLDevDetectiveError):
     """encountered some unexpected cpp directive in plan"""
 
     ...
 
 
-class InvalidPlan(Exception):
+class InvalidPlan(TKLDevDetectiveError):
     """plan appears to not be valid (mismatched #if* and #endif directives
     likely)"""
 

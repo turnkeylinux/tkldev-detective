@@ -22,6 +22,7 @@ import sys
 
 from libtkldet import locator, modman, report, colors
 import libtkldet
+import libtkldet.error
 import libtkldet.classifier
 import libtkldet.linter
 
@@ -100,8 +101,16 @@ if __name__ == "__main__":
                 print("classifier", item.__class__.__name__)
 
     elif args.action == "lint":
-        for report in report.filter_all_reports(
-            perform_lint(args.target, args.dump_tags, args.skip_lint)
-        ):
-            print("\n|   ".join(report.format().split("\n")))
-            print()
+        try:
+            for report in report.filter_all_reports(
+                perform_lint(args.target, args.dump_tags, args.skip_lint)
+            ):
+                print("\n|   ".join(report.format().split("\n")))
+                print()
+        except libtkldet.error.PlanNotFound as e:
+            print(colors.RED + "error: " + colors.RESET +
+                "unable to find required plan: " + e.args[0])
+            sys.exit(1)
+        except libtkldet.error.TKLDevDetectiveError as e:
+            print(colors.RED + "error: " + colors.RESET + e.args[0])
+            sys.exit(1)

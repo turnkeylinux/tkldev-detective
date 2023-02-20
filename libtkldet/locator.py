@@ -17,10 +17,10 @@
 
 """locates files to be classified and eventually linted"""
 
-from os.path import join, normpath, basename, isdir
+from os.path import join, normpath, basename, isdir, isfile
 from glob import iglob
 
-from typing import Generator
+from typing import Generator, Optional
 
 from .error import ApplianceNotFound
 
@@ -31,7 +31,7 @@ def is_appliance_path(path: str):
     """ is path, a path to an appliance? """
     path = normpath(path)
     if path == join(PRODUCTS_DIR, basename(path)):
-        return True
+        return isfile(join(path, 'Makefile'))
     return False
 
 
@@ -52,18 +52,24 @@ def is_inside_appliance(path: str):
 def get_appliance_root(path: str) -> str:
     """Given a path to appliance, file inside appliance or appliance name,
     return absolute path to the appliance"""
+
+    root: Optional[str] = None
+
     if is_appliance_name(path):
-        return join(PRODUCTS_DIR, path)
-    if is_appliance_path(path):
-        return normpath(path)
-    if is_inside_appliance(path):
+        root = join(PRODUCTS_DIR, path)
+    elif is_appliance_path(path):
+        root =  normpath(path)
+    elif is_inside_appliance(path):
         path = path[len(PRODUCTS_DIR) + 1 :]
         appliance_name = path.split("/", 1)[0]
-        return join(PRODUCTS_DIR, appliance_name)
-    raise ApplianceNotFound(
-        "input does not appear to be an appliance name, path to an appliance"
-        " or path to a file inside of an appliance"
-    )
+        root = join(PRODUCTS_DIR, appliance_name)
+
+    if root is None or not isfile(join(root, 'Makefile')):
+        raise ApplianceNotFound(
+            "input does not appear to be an appliance name, path to an appliance"
+            " or path to a file inside of an appliance"
+        )
+    return root
 
 
 def locator(root: str) -> Generator[str, None, None]:

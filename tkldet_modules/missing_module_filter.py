@@ -19,7 +19,7 @@ from typing import Generator, Optional
 
 from libtkldet.report import Report, ReportLevel, register_filter, ReportFilter
 from libtkldet.linter import FileItem
-from libtkldet.apt_file import find_python_package
+from libtkldet.apt_file import find_python_package_from_import
 from libtkldet.common_data import (
     is_package_to_be_installed, get_path_in_common_overlay
 )
@@ -29,13 +29,13 @@ import re
 MISSING_MODULE_RE = re.compile(r"^Unable to import '(.*)'$")
 
 def filter_packaged(report: Report, module_name: str) -> Optional[Report]:
-    package = find_python_package(module_name)
+    packages = find_python_package_from_import(module_name)
 
     modified_fix = report.fix or ''
     modified_message = report.message
     modified_level = report.level
 
-    if not package:
+    if not packages:
         if not report.fix:
             modified_fix = ""
         modified_fix += (
@@ -43,13 +43,20 @@ def filter_packaged(report: Report, module_name: str) -> Optional[Report]:
             " overlay or by non-debian repo, if so ignore this lint)"
         )
     else:
-        if not is_package_to_be_installed(package):
-            modified_message += f' (perhaps you meant to add "{package}" to the plan?)'
-        else:
-            modified_level = ReportLevel.INFO
-            modified_message += (f' ("{package}" likely provides this '
-            +'module and will be installed, so this is probably safe to'
-            +' ignore)')
+        package_installed = False
+        for package in packages:
+            if is_package_to_be_installed(package):
+                modified_level = ReportLevel.INFO
+                modified_message += (f' ("{package}" likely provides this '
+                +'module and will be installed at build time)')
+                package_installed = True
+                break
+        if not package_installed:
+            if len(packages) > 1:
+                packages_str = ', '.join('"' + pkg + '"' for pkg in packages)
+                modified_message += f' (perhaps you meant to add one of {packages_str} to the plan?)'
+            else:
+                modified_message += f' (perhaps you meant to add "{packages[0]}" to the plan?)'
 
     return report.modified(
         fix=modified_fix,
@@ -65,11 +72,11 @@ class MissingModuleFilter(ReportFilter):
             assert match is not None
             module_name = match.group(1)
 
-            if '.' in module_name:
-                module_name = module_name.split('.', 1)[0]
-
             if isinstance(report.item, FileItem) and dirname(report.item.relpath) == 'overlay/usr/lib/inithooks/bin':
-                if get_path_in_common_overlay(f'/usr/lib/inithooks/bin/{module_name}.py'):
+                temp_module_name = module_name
+                if '.' in temp_module_name:
+                    temp_module_name = temp_module_name.split('.', 1)[0]
+                if get_path_in_common_overlay(f'/usr/lib/inithooks/bin/{temp_module_name}.py'):
                     # file exists in an overlay from somewhere, so this lint is
                     # definitely incorrect
                     return None
