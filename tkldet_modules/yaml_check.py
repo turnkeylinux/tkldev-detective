@@ -14,14 +14,17 @@
 #
 # You should have received a copy of the GNU General Public License along with
 # tkldev-detective. If not, see <https://www.gnu.org/licenses/>.
-import yaml
+try:
+    import yaml
+except ImportError:
+    YAML = False
+else:
+    YAML = True
 from typing import Generator
 
 from libtkldet.linter import FileLinter, FileItem, register_linter
 from libtkldet.report import Report, FileReport, ReportLevel
 
-
-@register_linter
 class YamlLinter(FileLinter):
     ENABLE_TAGS: set[str] = {"ext:yaml", "ext:yml"}
     DISABLE_TAGS: set[str] = set()
@@ -55,3 +58,6 @@ class YamlLinter(FileLinter):
                     source="yaml_check",
                     level=ReportLevel.ERROR,
                 )
+
+if YAML:
+    register_linter(YamlLinter)

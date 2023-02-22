@@ -52,7 +52,7 @@ E.g.
 ``tkldev-detective lint zoneminder``
 
 For more information on how it works and how to develop more functionality, see
-`overview`_, `custom modules`_ and `tools and tricks.rst`_
+`overview`_, `custom modules`_ and `tools and tricks`_
 
 Copyright
 ---------
