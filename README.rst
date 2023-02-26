@@ -10,11 +10,11 @@ Dependencies
 
 Mandatory Dependencies:
 
-    apt_file - for figuring out what packages provide certain files
+    apt-file - for figuring out what packages provide certain files
 
 Optional Dependencies:
 
-    pyyaml - enables yaml lint
+    python3-yaml - enables yaml lint
 
 Installation
 ------------
