@@ -15,6 +15,8 @@ Mandatory Dependencies:
 Optional Dependencies:
 
     python3-yaml - enables yaml lint
+    shellcheck - enables bash lints
+    pylint - enables python lints
 
 Installation
 ------------

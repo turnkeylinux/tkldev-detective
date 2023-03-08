@@ -44,7 +44,6 @@ def find_package_by_file(path: str) -> list[str]:
         ],
         capture_output=True,
         text=True,
-        check=True
     )
     if ret.returncode != 0:
         return []
