@@ -26,7 +26,7 @@ import os
 
 ASSIGNMENT_OPERATORS = ["?=", ":=", "+=", "="]
 CHECKS = ["ifeq", "ifneq", "ifdef", "ifndef"]
-MAKEFILE_ENV = {"FAB_PATH": os.environ["FAB_PATH"], "FAB_SHARE_PATH": "/usr/share/fab"}
+MAKEFILE_ENV = {"FAB_PATH": os.environ.get("FAB_PATH", '/turnkey/fab'), "FAB_SHARE_PATH": "/usr/share/fab"}
 
 
 def parse_assignment(line: str) -> Optional[tuple[str, str, str]]:
