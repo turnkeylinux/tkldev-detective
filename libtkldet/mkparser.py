@@ -57,6 +57,7 @@ class MakefileData:
     """holds variables set by makefiles"""
 
     variables: dict[str, list[str]]
+    included: list[str]
 
     def resolve_var(self, value: str) -> list[str]:
         """expand make variables, env variables and split into multiple values"""
@@ -103,6 +104,12 @@ class MakefileData:
             removelists_final=[*self["COMMON_REMOVELISTS_FINAL"]],
         )
 
+    def to_dict(self) -> dict:
+        return {
+            'variables': self.variables,
+            'included': self.included
+        }
+
 
 def parse_makefile(
     path: str, makefile_data: Optional[MakefileData] = None
@@ -111,7 +118,9 @@ def parse_makefile(
     function is recursive and makefile_data is used when including other
     makefiles"""
     if makefile_data is None:
-        makefile_data = MakefileData({})
+        makefile_data = MakefileData({}, [])
+
+    makefile_data.included.append(path)
 
     # defines aren't checked we skip all lines inside a define block
     in_define = False
