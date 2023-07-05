@@ -28,6 +28,23 @@ ASSIGNMENT_OPERATORS = ["?=", ":=", "+=", "="]
 CHECKS = ["ifeq", "ifneq", "ifdef", "ifndef"]
 MAKEFILE_ENV = {"FAB_PATH": os.environ.get("FAB_PATH", '/turnkey/fab'), "FAB_SHARE_PATH": "/usr/share/fab"}
 
+def split_value(raw: str) -> list[str]:
+    chunks = ['']
+    bracket_depth = 0
+    for c in raw:
+        if c == ')':
+            bracket_depth -= 1
+            chunks[-1] += ')'
+        elif c == '(':
+            bracket_depth += 1
+            chunks[-1] += '('
+        elif bracket_depth > 1:
+            chunks[-1] += c
+        elif c.isspace() and chunks[-1]:
+            chunks.append('')
+        else:
+            chunks[-1] += c
+    return chunks
 
 def parse_assignment(line: str) -> Optional[tuple[str, str, str]]:
     """attempt to parse a makefile assignment operation,
@@ -65,8 +82,8 @@ class MakefileData:
             var_name = value[2:-1]
             if var_name in MAKEFILE_ENV:
                 return [MAKEFILE_ENV[var_name]]
-            return self.variables.get(var_name, [])
-        return value.split()
+            return self.variables.get(var_name, ["<!" + var_name + "!>"])
+        return split_value(value)
 
     def assign_var(self, name: str, operator: str, values: str):
         """process a variable assignment"""
@@ -74,19 +91,19 @@ class MakefileData:
             # add to existing definition
             if name not in self.variables:
                 self.variables[name] = []
-            for value in values.split():
+            for value in split_value(values):
                 self.variables[name].extend(self.resolve_var(value))
         elif operator == "?=":
             # set only if not already set
             if name not in self.variables:
                 self.variables[name] = []
-                for value in values.split():
+                for value in split_value(values):
                     self.variables[name].extend(self.resolve_var(value))
         elif operator in ("=", ":="):
             # set unconditionally (these are semantically different operations)
             if name not in self.variables:
                 self.variables[name] = []
-            for value in values.split():
+            for value in split_value(values):
                 self.variables[name].extend(self.resolve_var(value))
         else:
             raise ValueError(f"unknown operator {operator!r}")
