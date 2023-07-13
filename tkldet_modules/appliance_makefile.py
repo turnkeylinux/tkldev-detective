@@ -69,7 +69,7 @@ class ApplianceMakefileLinter(FileLinter):
                         yield FileReport(
                             item=item,
                             line=i + 1,
-                            column=(0, len(var) - 1),
+                            column=(1, len(var)),
                             location_metadata=None,
                             fix=fix,
                             message="variable set is not a known CONF_VAR",

@@ -12,6 +12,11 @@ Mandatory Dependencies:
 
     apt-file - for figuring out what packages provide certain files
 
+Highly Recommended (but optional) Dependencies:
+
+    shellcheck - enables bash lints
+    pylint - enables python lints
+
 Optional Dependencies:
 
     python3-yaml - enables yaml lint
@@ -50,6 +55,17 @@ All of this provided you have the given appliance's build code on your machine.
 E.g.
 
 ``tkldev-detective lint zoneminder``
+
+Color support
+~~~~~~~~~~~~~
+
+tkldev-detective supports color highlighting and will attempt to detect whether
+the stdout supports color (check for a terminal). This behavior can be changed
+with the ``--color=always/never/auto`` option where:
+
+- ``auto``      provides default behavior
+- ``always``    always enables color
+- ``never``     disables color entirely
 
 For more information on how it works and how to develop more functionality, see
 `overview`_, `custom modules`_ and `tools and tricks`_

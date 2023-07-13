@@ -20,14 +20,33 @@ fab tool-chain on tkldev, so ignores tests & definitions, butchers most
 functions, doesn't understand targets, makes more unspoken assumptions and probably
 produces a lot of other erroneous output (if used for general makefile parsing)
 """
-from typing import Optional
+from typing import Optional, Union
+import typing
 from dataclasses import dataclass
 import os
 
 ASSIGNMENT_OPERATORS = ["?=", ":=", "+=", "="]
 CHECKS = ["ifeq", "ifneq", "ifdef", "ifndef"]
-MAKEFILE_ENV = {"FAB_PATH": os.environ["FAB_PATH"], "FAB_SHARE_PATH": "/usr/share/fab"}
+MAKEFILE_ENV = {"FAB_PATH": os.environ.get("FAB_PATH", '/turnkey/fab'), "FAB_SHARE_PATH": "/usr/share/fab"}
 
+def split_value(raw: str) -> list[str]:
+    chunks = ['']
+    bracket_depth = 0
+    for c in raw:
+        if c == ')':
+            bracket_depth -= 1
+            chunks[-1] += ')'
+        elif c == '(':
+            bracket_depth += 1
+            chunks[-1] += '('
+        elif bracket_depth > 0:
+            chunks[-1] += c
+        elif c.isspace() and chunks[-1]:
+            chunks.append('')
+        else:
+            chunks[-1] += c
+
+    return chunks
 
 def parse_assignment(line: str) -> Optional[tuple[str, str, str]]:
     """attempt to parse a makefile assignment operation,
@@ -51,21 +70,34 @@ class CommonFabBuildData:
     removelists: list[str]
     removelists_final: list[str]
 
+@dataclass
+class LazyVar:
+    "a value referencing a variable we havn't resolved yet"
+    name: str
+
+ValueList = list[Union[str, LazyVar]]
 
 @dataclass
-class MakefileData:
+class MutMakefileData:
     """holds variables set by makefiles"""
 
-    variables: dict[str, list[str]]
+    variables: dict[str, ValueList]
+    included: list[str]
 
-    def resolve_var(self, value: str) -> list[str]:
+    def resolve_var(self, value: str) -> ValueList:
         """expand make variables, env variables and split into multiple values"""
+        out_var: list[str | LazyVar] = []
+
         if value.startswith("$(") and value.endswith(")"):
             var_name = value[2:-1]
             if var_name in MAKEFILE_ENV:
-                return [MAKEFILE_ENV[var_name]]
-            return self.variables.get(var_name, [])
-        return value.split()
+                out_var.append(MAKEFILE_ENV[var_name])
+            else:
+                out_var.extend(self.variables.get(var_name,
+                    [LazyVar(var_name)]))
+        else:
+            out_var.extend(split_value(value))
+        return out_var
 
     def assign_var(self, name: str, operator: str, values: str):
         """process a variable assignment"""
@@ -73,22 +105,69 @@ class MakefileData:
             # add to existing definition
             if name not in self.variables:
                 self.variables[name] = []
-            for value in values.split():
+            for value in split_value(values):
                 self.variables[name].extend(self.resolve_var(value))
         elif operator == "?=":
             # set only if not already set
             if name not in self.variables:
                 self.variables[name] = []
-                for value in values.split():
+                for value in split_value(values):
                     self.variables[name].extend(self.resolve_var(value))
         elif operator in ("=", ":="):
             # set unconditionally (these are semantically different operations)
             if name not in self.variables:
                 self.variables[name] = []
-            for value in values.split():
+            for value in split_value(values):
                 self.variables[name].extend(self.resolve_var(value))
         else:
             raise ValueError(f"unknown operator {operator!r}")
+
+    def finish(self):
+        ''' resolve unresolved variables and return a concrete version of this
+        class with simpler typing '''
+        # variables in make are often not resolved immediately, and such the
+        # actual value of a variable may not be available until parsing has
+        # finished
+        #
+        # furthermore values may resolve to other variables that also have not
+        # yet been resolved and so on.
+        # 
+        # smart ways of handling this include chains of dependent variables or
+        # handling the semantic difference between `=`, `:=` and similar
+        # operations.
+        #
+        # we don't do that, we just try to resolve everything in a loop until
+        # done
+
+        done = False
+        while not done:
+            keys = list(self.variables.keys())
+            for key in keys:
+                done = True
+                values = self.variables[key]
+                new_values = []
+                for value in values:
+                    if isinstance(value, str):
+                        new_values.append(value)
+                    elif isinstance(value, LazyVar):
+                        new_v = self.variables.get(value.name,
+                                [f'$({value.name})'])
+                        if isinstance(new_v , LazyVar):
+                            done = False
+                        new_values.extend(new_v)
+                self.variables[key] = new_values
+
+        new_variables = {key: list(values) for key, values in
+                self.variables.items()}
+        new_included = list(self.included)
+        return MakefileData(typing.cast(dict[str, list[str]], new_variables), new_included)
+
+@dataclass
+class MakefileData(MutMakefileData):
+    """holds variables set by makefiles"""
+
+    variables: dict[str, list[str]]
+    included: list[str]
 
     def __getitem__(self, key: str) -> list[str]:
         return self.variables[key]
@@ -103,6 +182,12 @@ class MakefileData:
             removelists_final=[*self["COMMON_REMOVELISTS_FINAL"]],
         )
 
+    def to_dict(self) -> dict:
+        return {
+            'variables': self.variables,
+            'included': self.included
+        }
+
 
 def parse_makefile(
     path: str, makefile_data: Optional[MakefileData] = None
@@ -111,7 +196,9 @@ def parse_makefile(
     function is recursive and makefile_data is used when including other
     makefiles"""
     if makefile_data is None:
-        makefile_data = MakefileData({})
+        makefile_data = MakefileData({}, [])
+
+    makefile_data.included.append(path)
 
     # defines aren't checked we skip all lines inside a define block
     in_define = False
@@ -153,4 +240,4 @@ def parse_makefile(
                     .replace("$(FAB_SHARE_PATH)", "/usr/share/fab"),
                     makefile_data,
                 )
-    return makefile_data
+    return makefile_data.finish()
