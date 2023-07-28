@@ -19,11 +19,15 @@
 
 import importlib.machinery
 import importlib.util
-from os.path import join, dirname, abspath, splitext, isfile
+from os.path import join, dirname, abspath, splitext, isfile, exists
 from os import listdir
 import sys
 
 from . import colors as co
+from .error import TKLDevDetectiveError
+
+# priortise local tkldet_modules path, fallback to OS path
+MOD_PATH = [ abspath(__file__), '/usr/share/tkldev-detective']
 
 
 def _load_all_modules_from_dir(root: str):
@@ -46,6 +50,8 @@ def _load_all_modules_from_dir(root: str):
 
 def load_modules():
     """load all tkldev-detective modules"""
-    _load_all_modules_from_dir(
-        join(dirname(dirname(abspath(__file__))), "tkldet_modules")
-    )
+    for _path in (join(x, "tkldet_modules") for x in MOD_PATH):
+        if exists(_path):
+            _load_all_modules_from_dir(_path)
+            return
+    raise TKLDevDetectiveError(f"Mod path 'tkldet_modules' not found - tried {MOD_PATH}")
