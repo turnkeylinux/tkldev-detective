@@ -27,7 +27,7 @@ from . import colors as co
 from .error import TKLDevDetectiveError
 
 # priortise local tkldet_modules path, fallback to OS path
-MOD_PATH = [ abspath(__file__), '/usr/share/tkldev-detective']
+MOD_PATH = [ dirname(dirname(abspath(__file__))), '/usr/share/tkldev-detective']
 
 
 def _load_all_modules_from_dir(root: str):
