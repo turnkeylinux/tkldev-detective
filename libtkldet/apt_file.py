@@ -26,10 +26,7 @@ def is_installed(package_name: str) -> bool:
     pkg_installed = subprocess.run(
         ["dpkg-query", "-W", "--showformat='${Status}'", package_name]
         )
-    if pkg_installed.returncode == 0:
-        return True
-    else:
-        return False
+    return pkg_installed.returncode != 0
 
 
 HAS_APT_FILE: bool = is_installed("apt-file")
