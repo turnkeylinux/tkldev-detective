@@ -13,7 +13,8 @@ Architecture: all
 Depends:
     ${python:Depends},
     shellcheck,
-    pylint
+    pylint,
+    devscripts,
 Recommends:
     python3-yaml
 Description: linter for turnkeylinux appliances

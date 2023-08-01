@@ -23,9 +23,10 @@ import subprocess
 
 def is_installed(package_name: str) -> bool:
     """check if a given package is installed on the HOST system (tkldev)"""
-    return b"installed" in subprocess.check_output(
-        ["dpkg-query", "-W", "--showformat='${Status}'\n", package_name]
-    )
+    pkg_installed = subprocess.run(
+        ["dpkg-query", "-W", "--showformat='${Status}'", package_name]
+        )
+    return pkg_installed.returncode != 0
 
 
 HAS_APT_FILE: bool = is_installed("apt-file")

@@ -1,6 +1,7 @@
 #!/usr/bin/make -f
 
 export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+export DH_ALWAYS_EXCLUDE=.pyc:.pyo
 
 %:
 	dh $@ --with=python3 --buildsystem=pybuild
