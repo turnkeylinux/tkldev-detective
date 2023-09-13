@@ -5,12 +5,14 @@ import sys
 import json
 from argparse import ArgumentParser
 
+def fatal(msg):
+    print(f'Fatal: {msg}', file=sys.stderr)
+    sys.exit(1)
+
 try:
     from libtkldet import mkparser
 except ImportError:
-    print("tkldev-detective not installed (required for makefile parser)",
-        file=sys.stderr)
-    os.exit(1)
+    fatal("tkldev-detective not installed (required for makefile parser)")
     
 
 if __name__ == '__main__':
@@ -66,8 +68,10 @@ broader applications)
                 return '\n'.join(out)
             else:
                 return out
-
-    data = mkparser.parse_makefile(args.makefile).to_dict()
+    try:
+        data = mkparser.parse_makefile(args.makefile).to_dict()
+    except FileNotFoundError as e:
+        fatal("Makefile not found - please ensure that you are in app build code base dir")
 
     if args.var:
         if isinstance(args.var, str):
