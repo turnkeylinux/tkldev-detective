@@ -5,7 +5,7 @@ from os.path import isfile
 import sys
 import re
 
-CHANGE_HEAD=r'^turnkey-.*-(\d+)\.(\d+)-?(?:rc|beta)? \((\d+)\) .*$'
+CHANGE_HEAD=r'^turnkey-.*-(\d+)\.(\d+)?(?:rc|beta)\d? \((\d+)\) .*$'
 CHANGE_FOOTER=r' -- .*'
 
 def error(msg):
