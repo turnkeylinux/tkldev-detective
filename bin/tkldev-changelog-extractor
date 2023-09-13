@@ -10,6 +10,7 @@ CHANGE_FOOTER=r' -- .*'
 
 def error(msg):
     print('ERROR: ' + msg, file=sys.stderr)
+
 def warn(msg):
     print('WARN: ' + msg, file=sys.stderr)
 
@@ -49,6 +50,9 @@ def process_changelog(path):
                 continue
 
             if not line.strip():
+                continue
+
+            if not current_v:
                 continue
 
             assert current_v is not None
