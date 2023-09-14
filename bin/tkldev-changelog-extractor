@@ -5,7 +5,7 @@ from os.path import isfile
 import sys
 import re
 
-CHANGE_HEAD=r'^turnkey-.*-(\d+)\.(\d+)?(?:rc|beta)\d? \((\d+)\) .*$'
+CHANGE_HEAD=r'^turnkey-[a-z0-9-]+-(\d+)\.(\d+)-?(rc|beta)?\d? \((\d+)\) .*$'
 CHANGE_FOOTER=r' -- .*'
 
 def error(msg):
@@ -50,9 +50,6 @@ def process_changelog(path):
                 continue
 
             if not line.strip():
-                continue
-
-            if not current_v:
                 continue
 
             assert current_v is not None
