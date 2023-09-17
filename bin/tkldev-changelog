@@ -80,12 +80,12 @@ which vim > /dev/null || fatal "vim not found; call yourself a developer?!?"
 
 APP=$(basename $PWD)
 COMMON_CHANGES="${FAB_PATH}/common/changes"
-APP_CHANGELOGS="$(tkldev-makefile-info "$PWD/Makefile" -i \
-    | grep -E '^/turnkey/fab/common/' \
-    | sed -En 's|^([a-z0-9/-]+)/mk(/turnkey)?/*([a-z0-9-]+).mk|\1/changes\2/\3.changelog|p')"
+APP_CHANGELOGS=$(tkldev-makefile-info "$PWD/Makefile" -i \
+    | grep -E "^${FAB_PATH}/common/" \
+    | sed -En "s|^([a-z0-9/-]+)/mk/turnkey/*([a-z0-9-]+).mk|\1/changes/\2.changelog|p")
 
 if [ -z "$EXTRA_TEXT" ] && [ "$APP" != "core" ]; then
-    EXTRA_TEXT="$(tkldev-changelog-extractor "$PWD/changelog" $APP_CHANGELOGS)"
+    EXTRA_TEXT=$(tkldev-changelog-extractor "$PWD/changelog" "${FAB_PATH}/common/changes/turnkey.changelog" $APP_CHANGELOGS)
 fi
 
 EXTRA_TEXT_FILE="$(mktemp /tmp/tkldev-changelog.XXXXXX)"
