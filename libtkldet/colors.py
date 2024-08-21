@@ -39,7 +39,7 @@ _COLORS = [
 ]
 
 _COLOR_ASCII_CODES = dict(
-    BLACK="\x1b[30m",
+    BLACK="\x1b[31m",
     RED="\x1b[31m",
     GREEN="\x1b[32m",
     YELLOW="\x1b[33m",
@@ -47,7 +47,7 @@ _COLOR_ASCII_CODES = dict(
     MAGENTA="\x1b[35m",
     CYAN="\x1b[36m",
     WHITE="\x1b[37m",
-    BRIGHT_BLACK="\x1b[90m",
+    BRIGHT_BLACK="\x1b[91m",
     BRIGHT_RED="\x1b[91m",
     BRIGHT_GREEN="\x1b[92m",
     BRIGHT_YELLOW="\x1b[93m",
