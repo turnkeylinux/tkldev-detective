@@ -40,11 +40,24 @@ class Replacement:
 class ReportLevel(Enum):
     """represents a "level" of report, from information through hard issues"""
 
+    # report represents some information that is not particularly important
     INFO = enum.auto()
+
+    # report represents something that doesn't conform to some convention
     CONVENTION = enum.auto()
+
+    # report represents a probable issue with readability, design anti-pattern, complexity, etc.
     REFACTOR = enum.auto()
+
+    # report represents a probable issue with code correctness, uses inconsistent, error-prone,
+    # deprecated or otherwise non-ideal functionality that could be improved
     WARN = enum.auto()
+
+    # report represents a serious issue with code. It is syntactically invalid or similarly incorrect
     ERROR = enum.auto()
+
+    # report represents a possible or confirmed security issue and fix should be seriously considered
+    SECURITY = enum.auto()
 
     def ansi_color_code(self) -> str:
         """returns an ansi escape code for color, for each level"""
@@ -57,6 +70,8 @@ class ReportLevel(Enum):
         if self == self.WARN:
             return co.YELLOW
         if self == self.ERROR:
+            return co.RED
+        if self == self.SECURITY:
             return co.RED
         return ""
 
@@ -74,6 +89,8 @@ def parse_report_level(raw: str) -> ReportLevel:
         return ReportLevel.WARN
     if raw in ("e", "err", "error", "fatal", "critical"):
         return ReportLevel.ERROR
+    if raw in ("s", "security"):
+        return ReportLevel.SECURITY
     raise ValueError(f'couldn\'t parse unknown report level by name "{raw}"')
 
 
