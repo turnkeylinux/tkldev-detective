@@ -21,9 +21,9 @@ from os.path import join, dirname, abspath
 
 from libtkldet.linter import FileLinter, FileItem, register_linter
 from libtkldet.report import Report, FileReport, parse_report_level
-from libtkldet.apt_file import is_installed
+from libtkldet.apt_file import is_installed, is_in_path
 
-if is_installed("pylint"):
+if is_installed("pylint") and not is_in_path("ruff"):
     rcfile = join(dirname(dirname(abspath(__file__))), "pylint_rcfile")
 
     @register_linter

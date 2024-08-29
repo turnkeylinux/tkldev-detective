@@ -20,6 +20,13 @@ installed"""
 
 import subprocess
 
+def is_in_path(name: str) -> bool:
+    """check if a given name is in the path"""
+    in_path = subprocess.run(
+        ["which", name],
+        capture_output=True
+    )
+    return in_path.returncode == 0
 
 def is_installed(package_name: str) -> bool:
     """check if a given package is installed on the HOST system (tkldev)"""
