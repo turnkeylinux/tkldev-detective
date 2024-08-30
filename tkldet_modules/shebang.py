@@ -32,7 +32,7 @@ class ShebangClassifier(FileClassifier):
                     shebang = head.split(b"\n")[0].strip()
                     if shebang:
                         shebang = shebang.split()[0].strip()
-            shebang = str(shebang)
+            shebang = shebang.decode()
 
             if shebang.startswith("#!"):
                 item.add_tags(self, [f"shebang:{shebang[2:]}"])

@@ -19,12 +19,20 @@ from typing import Generator
 from os.path import relpath, abspath
 from . import locator, common_data, classifier
 from .common_data import APPLIANCE_ROOT
+from .error import ApplianceNotFound
 
 
-def initialize(path: str):
+def initialize(path: str, ignore_non_appliance: bool):
     """initialize everything, involves scraping makefiles, parsing plans, etc."""
-    root = locator.get_appliance_root(path)
-    common_data.initialize_common_data(root)
+    try:
+        root = locator.get_appliance_root(path)
+    except ApplianceNotFound:
+        if not ignore_non_appliance:
+            raise
+        else:
+            root = path
+    else:
+        common_data.initialize_common_data(root)
 
 
 def yield_appliance_items() -> Generator[classifier.Item, None, None]:

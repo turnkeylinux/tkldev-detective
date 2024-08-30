@@ -72,14 +72,14 @@ def get_appliance_root(path: str) -> str:
     return root
 
 
-def locator(root: str) -> Generator[str, None, None]:
+def locator(root: str, ignore_non_appliance: bool) -> Generator[str, None, None]:
     """yields (pretty much) every file in an appliance of potential concern
     or a specific file only if given a path to a file inside an appliance"""
     if is_appliance_name(root):
         yield from full_appliance_locator(join(PRODUCTS_DIR, root))
     elif is_appliance_path(root):
         yield from full_appliance_locator(root)
-    elif is_inside_appliance(root):
+    elif is_inside_appliance(root) or ignore_non_appliance:
         yield root
     else:
         raise ApplianceNotFound(
