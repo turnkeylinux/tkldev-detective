@@ -32,7 +32,7 @@ MOD_PATH = [ dirname(dirname(abspath(__file__))), '/usr/share/tkldev-detective']
 
 def _load_all_modules_from_dir(root: str):
     print(
-        co.BLACK + co.BOLD + "load all modules from", root + co.RESET, file=sys.stderr
+        co.BRIGHT_BLACK + co.BOLD + "load all modules from", root + co.RESET, file=sys.stderr
     )
     root = abspath(root)
     for filename in listdir(root):
@@ -45,7 +45,7 @@ def _load_all_modules_from_dir(root: str):
             assert spec.loader is not None
             spec.loader.exec_module(module)
 
-            print(co.BLACK + co.BOLD + "loaded", spec.name + co.RESET, file=sys.stderr)
+            print(co.BRIGHT_BLACK + co.BOLD + "loaded", spec.name + co.RESET, file=sys.stderr)
 
 
 def load_modules():
