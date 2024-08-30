@@ -439,9 +439,9 @@ RUFF_LINTS = dict(
         BLE001 = 'WARN', # blind `except`
     ),
     flake8_boolean_trap = dict(
-        FTB001 = None, # boolean typed positional arg in function def
-        FTB002 = None, # boolean default positional argument in func def
-        FTB003 = 'REFACTOR', # boolean positional value in func call
+        FBT001 = None, # boolean typed positional arg in function def
+        FBT002 = None, # boolean default positional argument in func def
+        FBT003 = 'REFACTOR', # boolean positional value in func call
     ),
     flake8_bugbear = dict(
         B002 = 'ERROR', # unary prefix increment/decrement
