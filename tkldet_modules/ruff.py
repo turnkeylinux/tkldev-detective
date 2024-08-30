@@ -1233,6 +1233,21 @@ if is_in_path("ruff"):
             ):
                 location_metadata = ''
 
+                level = ''
+                lint_is_known = False
+                for group in RUFF_LINTS.values():
+                    if report['code'] in group:
+                        level = group[report['code']]
+                        lint_is_known = True
+                        break
+
+                if level is None:
+                    # none means the lint is suppressed
+                    continue
+
+                if not lint_is_known:
+                    level = 'error'
+
                 yield FileReport(
                     item=item,
                     line=report["location"]["row"],
@@ -1246,5 +1261,18 @@ if is_in_path("ruff"):
                     fix=None,
                     source="ruff",
                     raw=report,
-                    level=parse_report_level("info"),
+                    level=parse_report_level(level),
                 )
+
+                if not lint_is_known:
+                    yield FileReport(
+                        item=item,
+                        line=None,
+                        column=None,
+                        location_metadata=None,
+                        message=f"found unknown lint: {report['code']}",
+                        fix=None,
+                        source="ruff",
+                        raw=report,
+                        level=parse_report_level('error')
+                    )
