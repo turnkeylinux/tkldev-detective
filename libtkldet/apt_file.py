@@ -31,8 +31,9 @@ def is_in_path(name: str) -> bool:
 def is_installed(package_name: str) -> bool:
     """check if a given package is installed on the HOST system (tkldev)"""
     pkg_installed = subprocess.run(
-        ["dpkg-query", "-W", "--showformat='${Status}'", package_name]
-        )
+        ["dpkg-query", "-W", "--showformat='${Status}'", package_name],
+        capture_output=True
+    )
     return pkg_installed.returncode != 0
 
 

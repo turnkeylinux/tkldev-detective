@@ -61,7 +61,7 @@ class Item:
         """show item value as well as tags"""
         print(f"{self.value}")
         for src in self._tags:
-            print(src, self._tags[src])
+            print("\t", src, self._tags[src])
 
 
 @dataclass(frozen=True)
