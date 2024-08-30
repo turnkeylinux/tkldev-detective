@@ -20,7 +20,8 @@ from os.path import relpath, abspath
 from typing import Generator
 import sys
 
-from libtkldet import locator, modman, report, colors
+from libtkldet import locator, modman, colors
+from libtkldet.report import Report, filter_all_reports
 import libtkldet
 import libtkldet.error
 from libtkldet.error import ApplianceNotFound
@@ -29,20 +30,18 @@ import libtkldet.linter
 
 
 def perform_lint(
-        path: str, dump_tags: bool, skip_lint: bool, ignore_non_appliance: bool
-) -> Generator[report.Report, None, None]:
-
-    libtkldet.initialize(path, ignore_non_appliance)
+    root_path: str, dump_tags: bool, skip_lint: bool, ignore_non_appliance: bool
+) -> Generator[Report, None, None]:
+    libtkldet.initialize(root_path, ignore_non_appliance)
     try:
-        root = locator.get_appliance_root(path)
+        root = locator.get_appliance_root(root_path)
     except ApplianceNotFound:
         if not ignore_non_appliance:
-            raise e
+            raise
         else:
-            root = path
+            root = root_path
 
-
-    for path in locator.locator(path, ignore_non_appliance):
+    for path in locator.locator(root_path, ignore_non_appliance):
         item = libtkldet.classifier.FileItem(
             value=path,
             _tags={},
@@ -116,9 +115,13 @@ if __name__ == "__main__":
 
     elif args.action == "lint":
         try:
-            for report in report.filter_all_reports(
-                perform_lint(args.target, args.dump_tags, args.skip_lint,
-                             args.ignore_non_appliance)
+            for report in filter_all_reports(
+                perform_lint(
+                    args.target,
+                    args.dump_tags,
+                    args.skip_lint,
+                    args.ignore_non_appliance,
+                )
             ):
                 print("\n|   ".join(report.format().split("\n")))
                 print()
