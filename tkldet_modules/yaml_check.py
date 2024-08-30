@@ -33,7 +33,7 @@ class YamlLinter(FileLinter):
         with open(item.abspath, "r") as fob:
             try:
                 yaml.safe_load(fob)
-            except yaml.constructor.ConstructorError as e:
+            except yaml.constructor.ConstructorError:
                 # ignore tags and other fancy stuff we can't easily check
                 pass
             except yaml.parser.ParserError as e:

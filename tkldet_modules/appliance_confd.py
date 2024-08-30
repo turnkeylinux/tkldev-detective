@@ -37,7 +37,7 @@ class ApplianceConfDLinter(FileLinter):
                 line=None,
                 column=None,
                 location_metadata=None,
-                message=f"conf.d script isn't executable",
+                message="conf.d script isn't executable",
                 fix=f"`chmod +x {item.abspath}`",
                 source="confd linter",
                 level=ReportLevel.ERROR,

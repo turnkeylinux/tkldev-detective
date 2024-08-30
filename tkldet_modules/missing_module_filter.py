@@ -73,7 +73,7 @@ class MissingModuleFilter(ReportFilter):
     def filter(self, report: Report) -> Generator[Report, None, None]:
         if (
             report.source == "pylint"
-            and report.raw != None
+            and report.raw is not None
             and report.raw["symbol"] == "import-error"
         ):
             match = MISSING_MODULE_RE.match(report.raw["message"])

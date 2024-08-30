@@ -57,7 +57,7 @@ class ApplianceMakefileLinter(FileLinter):
                         var = line.split("+=", 1)[0].strip()
                     else:
                         var = line.split("=", 1)[0].strip()
-                    if not var in MK_CONFVARS:
+                    if var not in MK_CONFVARS:
                         suggested_var = fuzzy_suggest(var, MK_CONFVARS)
                         if suggested_var:
                             fix = f"did you mean {suggested_var!r} instead of {var!r} ?"

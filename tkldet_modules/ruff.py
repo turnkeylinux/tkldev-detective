@@ -17,7 +17,6 @@
 import json
 from typing import Generator
 import subprocess
-from os.path import join, dirname, abspath
 
 from libtkldet.linter import FileLinter, FileItem, register_linter
 from libtkldet.report import Report, FileReport, parse_report_level
