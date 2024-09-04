@@ -57,6 +57,15 @@ class Item:
             self._tags[name] = set()
         self._tags[name].update(tags)
 
+    def has_tag(self, tag: str) -> bool:
+        """Check if item contains a given tag"""
+        return tag in self.tags
+
+    def has_tag_type(self, tag_type: str) -> bool:
+        """Checks if item contains a variant tag of a given type"""
+        check = tag_type + ':'
+        return any(tag.startswith(check) for tag in self.tags)
+
     def pretty_print(self) -> None:
         """Show item value as well as tags"""
         print(f"{self.value}")

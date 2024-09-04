@@ -100,7 +100,7 @@ def everything_locator(root: str) -> Generator[str, None, None]:
     if isfile(root):
         yield root
     else:
-        yield from iglob(join(root, '**'))
+        yield from iglob(join(root, '**'), recursive=True)
 
 def full_appliance_locator(root: str) -> Generator[str, None, None]:
     """Yield (pretty much) every file in an appliance of potential concern"""

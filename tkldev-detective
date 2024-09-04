@@ -48,8 +48,15 @@ def perform_lint(
             relpath=relpath(path, start=root),
             abspath=abspath(path),
         )
+        ignore = False
         for classifier in all_classifiers:
             classifier.classify(item)
+            if item.has_tag_type('ignore'):
+                ignore = True
+                break
+        if ignore:
+            continue
+
         if dump_tags:
             item.pretty_print()
         if not skip_lint:
