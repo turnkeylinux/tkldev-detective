@@ -14,7 +14,10 @@
 #
 # You should have received a copy of the GNU General Public License along with
 # tkldev-detective. If not, see <https://www.gnu.org/licenses/>.
-from typing import Generator
+
+"""Lints for appliance conf.d/* scripts"""
+
+from typing import Generator, ClassVar
 import stat
 import os
 
@@ -24,8 +27,8 @@ from libtkldet.report import Report, FileReport, ReportLevel
 
 @register_linter
 class ApplianceConfDLinter(FileLinter):
-    ENABLE_TAGS: set[str] = {"appliance-conf.d"}
-    DISABLE_TAGS: set[str] = set()
+    ENABLE_TAGS: ClassVar[set[str]] = {"appliance-conf.d"}
+    DISABLE_TAGS: ClassVar[set[str]] = set()
 
     def check(self, item: FileItem) -> Generator[Report, None, None]:
         mode = os.lstat(item.abspath).st_mode

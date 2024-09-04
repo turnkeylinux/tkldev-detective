@@ -14,7 +14,10 @@
 #
 # You should have received a copy of the GNU General Public License along with
 # tkldev-detective. If not, see <https://www.gnu.org/licenses/>.
-from typing import Generator
+
+"""Linters for appliance makefile"""
+
+from typing import Generator, ClassVar
 
 from libtkldet.linter import FileLinter, register_linter, FileItem
 from libtkldet.report import Report, FileReport, ReportLevel
@@ -23,15 +26,17 @@ from libtkldet.fuzzy import fuzzy_suggest
 
 @register_linter
 class ApplianceMakefileLinter(FileLinter):
-    ENABLE_TAGS: set[str] = {"appliance-makefile"}
-    DISABLE_TAGS: set[str] = set()
+    """Linter for appliance makefile"""
+
+    ENABLE_TAGS: ClassVar[set[str]] = {"appliance-makefile"}
+    DISABLE_TAGS: ClassVar[set[str]] = set()
 
     def check(self, item: FileItem) -> Generator[Report, None, None]:
-        MK_CONFVARS = ["COMMON_CONF", "COMMON_OVERLAYS"]
+        mk_confvars = ["COMMON_CONF", "COMMON_OVERLAYS"]
         with open("/turnkey/fab/common/mk/turnkey.mk", "r") as fob:
             for line in fob:
                 if line.startswith("CONF_VARS += "):
-                    MK_CONFVARS.extend(line.strip().split()[2:])
+                    mk_confvars.extend(line.strip().split()[2:])
 
         in_define = False
         first_include = None
@@ -57,15 +62,15 @@ class ApplianceMakefileLinter(FileLinter):
                         var = line.split("+=", 1)[0].strip()
                     else:
                         var = line.split("=", 1)[0].strip()
-                    if var not in MK_CONFVARS:
-                        suggested_var = fuzzy_suggest(var, MK_CONFVARS)
+                    if var not in mk_confvars:
+                        suggested_var = fuzzy_suggest(var, mk_confvars)
                         if suggested_var:
                             fix = f"did you mean {suggested_var!r} instead of {var!r} ?"
                         else:
                             fix = (
-                                f"either replace with one of {MK_CONFVARS} or add it to"
+                                f"either replace with one of {mk_confvars} or add it to"
+                                " turnkey.mk's list of valid CONF_VARS",
                             )
-                            " turnkey.mk's list of valid CONF_VARS",
                         yield FileReport(
                             item=item,
                             line=i + 1,

@@ -24,7 +24,7 @@ from libtkldet import locator, modman, colors
 from libtkldet.report import Report, filter_all_reports
 import libtkldet
 import libtkldet.error
-from libtkldet.error import ApplianceNotFound
+from libtkldet.error import ApplianceNotFoundError
 import libtkldet.classifier
 import libtkldet.linter
 
@@ -35,7 +35,7 @@ def perform_lint(
     libtkldet.initialize(root_path, ignore_non_appliance)
     try:
         root = locator.get_appliance_root(root_path)
-    except ApplianceNotFound:
+    except ApplianceNotFoundError:
         if not ignore_non_appliance:
             raise
         else:

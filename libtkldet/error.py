@@ -18,31 +18,29 @@
 
 
 class TKLDevDetectiveError(Exception):
-    '''Base class for tkldev-detective specific errors'''
-    ...
+    """Base class for tkldev-detective specific errors"""
 
 
-class ApplianceNotFound(TKLDevDetectiveError):
-    """appliance was not found for some reason (likely path/app name was
-    incorrect)"""
+class ApplianceNotFoundError(TKLDevDetectiveError):
+    """Appliance was not found
 
-    ...
-
-
-class PlanNotFound(TKLDevDetectiveError):
-    """a plan could not be included (likely include name is incorrect)"""
-
-    ...
+    Likely path/app name was incorrect
+    """
 
 
-class UnknownPlanDirective(TKLDevDetectiveError):
-    """encountered some unexpected cpp directive in plan"""
+class PlanNotFoundError(TKLDevDetectiveError):
+    """A plan could not be included
 
-    ...
+    Likely include name is incorrect
+    """
 
 
-class InvalidPlan(TKLDevDetectiveError):
-    """plan appears to not be valid (mismatched #if* and #endif directives
-    likely)"""
+class UnknownPlanDirectiveError(TKLDevDetectiveError):
+    """Encountered some unexpected CPP directive in plan"""
 
-    ...
+
+class InvalidPlanError(TKLDevDetectiveError):
+    """Plan appears to not be valid
+
+    Mismatched #if* and #endif directives likely
+    """

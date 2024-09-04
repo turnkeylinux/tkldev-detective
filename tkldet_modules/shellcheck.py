@@ -23,14 +23,13 @@ from libtkldet.report import Report, FileReport, parse_report_level, Replacement
 from libtkldet.apt_file import is_installed
 
 if is_installed("shellcheck"):
-    def insert_str(v: str, i: int, instr: str):
+    def insert_str(v: str, i: int, instr: str) -> str:
         return v[:i] + instr + v[i:]
 
 
     def expand_lines(lines: list[str]) -> Generator[str, None, None]:
         for line in lines:
-            for subline in line.splitlines():
-                yield subline
+            yield from line.splitlines()
 
 
     def format_replacement(

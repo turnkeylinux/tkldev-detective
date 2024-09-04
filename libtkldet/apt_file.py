@@ -15,23 +15,26 @@
 # You should have received a copy of the GNU General Public License along with
 # tkldev-detective. If not, see <https://www.gnu.org/licenses/>.
 
-"""relates to finding packages based on files they provide, including those not
-installed"""
+"""Utilities for finding packages
+
+Finds packages based on files they provide, including those not
+installed
+"""
 
 import subprocess
 
 def is_in_path(name: str) -> bool:
-    """check if a given name is in the path"""
+    """Check if a given name is in the path"""
     in_path = subprocess.run(
-        ["which", name],
+        ["/usr/bin/which", name],
         capture_output=True
     )
     return in_path.returncode == 0
 
 def is_installed(package_name: str) -> bool:
-    """check if a given package is installed on the HOST system (tkldev)"""
+    """Check if a given package is installed on the HOST system (tkldev)"""
     pkg_installed = subprocess.run(
-        ["dpkg-query", "-W", "--showformat='${Status}'", package_name],
+        ["/usr/bin/dpkg-query", "-W", "--showformat='${Status}'", package_name],
         capture_output=True
     )
     return pkg_installed.returncode != 0
@@ -41,11 +44,11 @@ HAS_APT_FILE: bool = is_installed("apt-file")
 
 
 def find_package_by_file(path: str) -> list[str]:
-    """return a list of packages that provide a file at a given path"""
+    """Return a list of packages that provide a file at a given path"""
 
     ret = subprocess.run(
         [
-            "apt-file",
+            "/usr/bin/apt-file",
             "search",
             "--package-only",
             "-x",
@@ -60,14 +63,16 @@ def find_package_by_file(path: str) -> list[str]:
 
 
 def find_python_package(package_name: str) -> list[str]:
-    """return a list of packages that provide a given python module"""
+    """Return a list of packages that provide a given python module"""
     return find_package_by_file(
         f"/usr/lib/python3/dist-packages/{package_name}(\\.py)?"
     )
 
 
 def find_python_package_from_import(module_str: str) -> list[str]:
-    """return a list of packages that provide a given python import module, may
+    """Find python package from import name
+
+    Return a list of packages that provide a given python import module, may
     be several modules deep (e.g. `foo.bar.baz`), attempts to find most
     specific python package provider
     """

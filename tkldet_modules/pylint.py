@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License along with
 # tkldev-detective. If not, see <https://www.gnu.org/licenses/>.
 import json
-from typing import Generator
+from typing import Generator, ClassVar
 import subprocess
 from os.path import join, dirname, abspath
 
@@ -28,18 +28,21 @@ if is_installed("pylint") and not is_in_path("ruff"):
 
     @register_linter
     class PyLinter(FileLinter):
-        ENABLE_TAGS: set[str] = {
+        ENABLE_TAGS: ClassVar[set[str]] = {
             "ext:py",
             "shebang:/usr/bin/python",
             "shebang:/usr/bin/python3",
             "shebang:/usr/bin/python3.9",
+            "shebang:/usr/bin/env python",
+            "shebang:/usr/bin/env python3",
+            "shebang:/usr/bin/env python3.9",
         }
-        DISABLE_TAGS: set[str] = set()
+        DISABLE_TAGS: ClassVar[set[str]] = set()
 
         def check(self, item: FileItem) -> Generator[Report, None, None]:
             for report in json.loads(
                 subprocess.run(
-                    ["pylint", item.abspath, "-f", "json", "--rcfile", rcfile],
+                    ["/usr/bin/pylint", item.abspath, "-f", "json", "--rcfile", rcfile],
                     capture_output=True,
                     text=True,
                 ).stdout

@@ -20,14 +20,14 @@
 from os.path import join, normpath, basename, isdir, isfile
 from glob import iglob
 
-from typing import Generator, Optional
+from typing import Generator
 
-from .error import ApplianceNotFound
+from .error import ApplianceNotFoundError
 
 PRODUCTS_DIR = "/turnkey/fab/products"
 
 
-def is_appliance_path(path: str):
+def is_appliance_path(path: str) -> bool:
     """ is path, a path to an appliance? """
     path = normpath(path)
     if path == join(PRODUCTS_DIR, basename(path)):
@@ -35,12 +35,12 @@ def is_appliance_path(path: str):
     return False
 
 
-def is_appliance_name(name: str):
+def is_appliance_name(name: str) -> bool:
     """ is name, the name of an existing appliance on tkldev? """
     return "/" not in name and isdir(join(PRODUCTS_DIR, name))
 
 
-def is_inside_appliance(path: str):
+def is_inside_appliance(path: str) -> bool:
     """ is path, a path to a file inside an appliance """
     path = normpath(path)
     if not path.startswith(PRODUCTS_DIR + "/"):
@@ -50,10 +50,13 @@ def is_inside_appliance(path: str):
 
 
 def get_appliance_root(path: str) -> str:
-    """Given a path to appliance, file inside appliance or appliance name,
-    return absolute path to the appliance"""
+    """Get appliance root from path
 
-    root: Optional[str] = None
+    Given a path to appliance, file inside appliance or appliance name,
+    return absolute path to the appliance
+    """
+
+    root: str | None = None
 
     if is_appliance_name(path):
         root = join(PRODUCTS_DIR, path)
@@ -65,33 +68,44 @@ def get_appliance_root(path: str) -> str:
         root = join(PRODUCTS_DIR, appliance_name)
 
     if root is None or not isfile(join(root, "Makefile")):
-        raise ApplianceNotFound(
+        error_message = (
             "input does not appear to be an appliance name, path to an appliance"
             " or path to a file inside of an appliance"
         )
+        raise ApplianceNotFoundError(error_message)
     return root
 
 
 def locator(root: str, ignore_non_appliance: bool) -> Generator[str, None, None]:
-    """yields (pretty much) every file in an appliance of potential concern
-    or a specific file only if given a path to a file inside an appliance"""
+    """Yield most files inside appliance
+
+    Yields almost every file in an appliance of potential concern
+    or a specific file only if given a path to a file inside an appliance
+    """
     if is_appliance_name(root):
         yield from full_appliance_locator(join(PRODUCTS_DIR, root))
     elif is_appliance_path(root):
         yield from full_appliance_locator(root)
     elif is_inside_appliance(root) or ignore_non_appliance:
-        yield root
+        yield from everything_locator(root)
     else:
-        raise ApplianceNotFound(
+        error_message = (
             "input does not appear to be an appliance name, path to an"
             " appliance or path to a file inside of an appliance"
         )
+        raise ApplianceNotFoundError(error_message)
 
+def everything_locator(root: str) -> Generator[str, None, None]:
+    """Yield everything, appliance or not"""
+    if isfile(root):
+        yield root
+    else:
+        yield from iglob(join(root, '**'))
 
 def full_appliance_locator(root: str) -> Generator[str, None, None]:
-    """yields (pretty much) every file in an appliance of potential concern"""
-    yield from map(
-        lambda x: join(root, x), ["Makefile", "changelog", "README.rst", "removelist"]
+    """Yield (pretty much) every file in an appliance of potential concern"""
+    yield from (
+        join(root, x) for x in ["Makefile", "changelog", "README.rst", "removelist"]
     )
     yield from iter_conf(root)
     yield from iter_plan(root)

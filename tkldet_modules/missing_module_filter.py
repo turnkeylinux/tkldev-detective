@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License along with
 # tkldev-detective. If not, see <https://www.gnu.org/licenses/>.
 
-from typing import Generator, Optional
+from typing import Generator
 
 from libtkldet.report import Report, ReportLevel, register_filter, ReportFilter
 from libtkldet.linter import FileItem
@@ -27,7 +27,7 @@ import re
 MISSING_MODULE_RE = re.compile(r"^Unable to import '(.*)'$")
 
 
-def filter_packaged(report: Report, module_name: str) -> Optional[Report]:
+def filter_packaged(report: Report, module_name: str) -> Report | None:
     packages = find_python_package_from_import(module_name)
 
     modified_fix = report.fix or ""
@@ -48,7 +48,7 @@ def filter_packaged(report: Report, module_name: str) -> Optional[Report]:
                 modified_level = ReportLevel.INFO
                 modified_message += (
                     f' ("{package}" likely provides this '
-                    + "module and will be installed at build time)"
+                    "module and will be installed at build time)"
                 )
                 package_installed = True
                 break

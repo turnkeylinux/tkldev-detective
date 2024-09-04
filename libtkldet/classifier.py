@@ -22,7 +22,7 @@ code here provides ability to "classify" different files
 """
 
 from dataclasses import dataclass
-from typing import Generator, Iterable, Type, cast
+from typing import Generator, Iterable, cast
 from os.path import dirname
 
 
@@ -46,19 +46,19 @@ class Item:
 
     @property
     def tags(self) -> Generator[str, None, None]:
-        """ yields all tags, may contain duplicates """
+        """Yields all tags, may contain duplicates"""
         for tags in self._tags.values():
             yield from tags
 
-    def add_tags(self, classifier: "Classifier", tags: Iterable[str]):
-        """convenience method for adding tags to an item"""
+    def add_tags(self, classifier: "Classifier", tags: Iterable[str]) -> None:
+        """Add tags to an item"""
         name = classifier.__class__.__name__
         if name not in self._tags:
             self._tags[name] = set()
         self._tags[name].update(tags)
 
-    def pretty_print(self):
-        """show item value as well as tags"""
+    def pretty_print(self) -> None:
+        """Show item value as well as tags"""
         print(f"{self.value}")
         for src in self._tags:
             print("\t", src, self._tags[src])
@@ -111,29 +111,32 @@ class Classifier:
     classifier can leverage information provided (or omitted) by previous
     classifiers"""
 
-    ItemType: Type[Item] = Item
+    ItemType: type[Item] = Item
 
-    def do_classify(self, item: Item):
-        """actually perform a classification so long as the concrete item type
-        is compatible with this classifier"""
+    def do_classify(self, item: Item) -> None:
+        """Perform classification
+
+        Perform a classification so long as the concrete item type
+        is compatible with this classifier
+        """
         if isinstance(item, self.ItemType):
             self.classify(item)
 
-    def classify(self, item: Item):
-        """abstract method to be implemented by subclass"""
-        raise NotImplementedError()
+    def classify(self, item: Item) -> None:
+        """Classify exact item type"""
+        raise NotImplementedError
 
 
 class FileClassifier(Classifier):
     """Specialized classifer which operates on "FileItem"s"""
 
-    ItemType: Type[Item] = FileItem
+    ItemType: type[Item] = FileItem
 
 
 class PackageClassifier(Classifier):
     """Specialized classifier which operates on "PackageItem"s"""
 
-    ItemType: Type[Item] = PackageItem
+    ItemType: type[Item] = PackageItem
 
 
 class ExactPathClassifier(FileClassifier):
@@ -145,7 +148,7 @@ class ExactPathClassifier(FileClassifier):
     tags: list[str]
     "exact tags to add to matched item"
 
-    def classify(self, item: Item):
+    def classify(self, item: Item) -> None:
         item = cast(FileItem, item)
         # item will definitely be subclass of
         # cls.ItemType, just need to convince the type checker
@@ -166,7 +169,7 @@ class SubdirClassifier(FileClassifier):
     tags: list[str]
     "exact tags to add to matched item"
 
-    def classify(self, item: Item):
+    def classify(self, item: Item) -> None:
         item = cast(FileItem, item)
         # item will definitely be subclass of
         # cls.ItemType, just need to convince the type checker
@@ -175,23 +178,24 @@ class SubdirClassifier(FileClassifier):
             if item.relpath.startswith(self.path):
                 # XXX doesn't handle any `..` in path, hopefully doesn't matter
                 item.add_tags(self, self.tags[:])
-        else:
-            if dirname(item.relpath) == self.path:
-                item.add_tags(self, self.tags[:])
+        elif dirname(item.relpath) == self.path:
+            item.add_tags(self, self.tags[:])
 
 
-_CLASSIFIERS: list[Type[Classifier]] = []
+_CLASSIFIERS: list[type[Classifier]] = []
 
 
-def register_classifier(classifier: Type[Classifier]):
-    """registers a classifier for use in tkldev-detective, must be called on all
-    classifiers added"""
+def register_classifier(classifier: type[Classifier]) -> type[Classifier]:
+    """Register a classifier
+
+    This must be called on classifiers added
+    """
     _CLASSIFIERS.append(classifier)
     return classifier
 
 
 def get_weighted_classifiers() -> list[Classifier]:
-    """returns instances of registered classifiers in order of weight"""
+    """Return instances of registered classifiers in order of weight"""
     return sorted(
-        map(lambda x: x(), _CLASSIFIERS), key=lambda x: (x.WEIGHT, x.__class__.__name__)
+        (c() for c in _CLASSIFIERS), key=lambda x: (x.WEIGHT, x.__class__.__name__)
     )

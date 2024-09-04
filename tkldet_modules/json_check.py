@@ -14,8 +14,11 @@
 #
 # You should have received a copy of the GNU General Public License along with
 # tkldev-detective. If not, see <https://www.gnu.org/licenses/>.
+
+"""Json related linters"""
+
 import json
-from typing import Generator
+from typing import Generator, ClassVar
 
 from libtkldet.linter import FileLinter, FileItem, register_linter
 from libtkldet.report import Report, FileReport, ReportLevel
@@ -23,10 +26,12 @@ from libtkldet.report import Report, FileReport, ReportLevel
 
 @register_linter
 class JsonLinter(FileLinter):
-    ENABLE_TAGS: set[str] = {
+    """Tries to load json, lints if errors are produced"""
+
+    ENABLE_TAGS: ClassVar[set[str]] = {
         "ext:json",
     }
-    DISABLE_TAGS: set[str] = set()
+    DISABLE_TAGS: ClassVar[set[str]] = set()
 
     def check(self, item: FileItem) -> Generator[Report, None, None]:
         with open(item.abspath, "r") as fob:

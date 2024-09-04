@@ -30,9 +30,14 @@ from .error import TKLDevDetectiveError
 MOD_PATH = [ dirname(dirname(abspath(__file__))), '/usr/share/tkldev-detective']
 
 
-def _load_all_modules_from_dir(root: str):
+def _load_all_modules_from_dir(root: str) -> None:
     print(
-        co.BRIGHT_BLACK + co.BOLD + "load all modules from", root + co.RESET, file=sys.stderr
+        co.BRIGHT_BLACK
+        + co.BOLD
+        + "load all modules from",
+        root +
+        co.RESET,
+        file=sys.stderr
     )
     root = abspath(root)
     for filename in listdir(root):
@@ -45,13 +50,21 @@ def _load_all_modules_from_dir(root: str):
             assert spec.loader is not None
             spec.loader.exec_module(module)
 
-            print(co.BRIGHT_BLACK + co.BOLD + "loaded", spec.name + co.RESET, file=sys.stderr)
+            print(
+                co.BRIGHT_BLACK
+                + co.BOLD
+                + "loaded",
+                spec.name
+                + co.RESET,
+                file=sys.stderr
+            )
 
 
-def load_modules():
-    """load all tkldev-detective modules"""
+def load_modules() -> None:
+    """Load all tkldev-detective modules"""
     for _path in (join(x, "tkldet_modules") for x in MOD_PATH):
         if exists(_path):
             _load_all_modules_from_dir(_path)
             return
-    raise TKLDevDetectiveError(f"Mod path 'tkldet_modules' not found - tried {MOD_PATH}")
+    error_message = f"Mod path 'tkldet_modules' not found - tried {MOD_PATH}"
+    raise TKLDevDetectiveError(error_message)

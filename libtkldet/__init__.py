@@ -19,24 +19,26 @@ from typing import Generator
 from os.path import relpath, abspath
 from . import locator, common_data, classifier
 from .common_data import APPLIANCE_ROOT
-from .error import ApplianceNotFound
+from .error import ApplianceNotFoundError
 
 
-def initialize(path: str, ignore_non_appliance: bool):
-    """initialize everything, involves scraping makefiles, parsing plans, etc."""
+def initialize(path: str, ignore_non_appliance: bool) -> None:
+    """Initialize everything
+
+    Involves scraping makefiles, parsing plans, etc.
+    """
     try:
         root = locator.get_appliance_root(path)
-    except ApplianceNotFound:
+    except ApplianceNotFoundError:
         if not ignore_non_appliance:
             raise
-        else:
-            root = path
+        root = path
     else:
         common_data.initialize_common_data(root)
 
 
 def yield_appliance_items() -> Generator[classifier.Item, None, None]:
-    '''generator that yields everything "lintable"'''
+    """Yield everything 'lintable'"""
 
     yield from common_data.iter_packages()
     for path in locator.locator(APPLIANCE_ROOT):

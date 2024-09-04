@@ -214,14 +214,15 @@ RUFF_LINTS = dict(
         
         D200 = 'CONVENTION', # one line docstring not on one line
         D201 = None, # (conflicts D211) blank line before func docstring
-        D202 = 'CONVENTION', # blank line after func docstring
+        D202 = None, # blank line after func docstring
         D203 = 'CONVENTION', # missing blank line before class docstring
         D204 = 'CONVENTION', # missing blank line after class docstring
-        D206 = 'CONVENTION', # missing blank line between summary and description in docstring
+        D205 = 'CONVENTION', # missing blank line between summary and description in docstring
+        D206 = 'CONVENTION', # docstring should be indented with spaces not tabs
         D207 = 'CONVENTION', # under-indented docstring
         D208 = 'CONVENTION', # over-indented docstring
         D209 = 'CONVENTION', # multi-line docstring should close on seperate line
-        D210 = 'CONVENTION', # whitespace surrounding docstring text
+        D210 = None, # whitespace surrounding docstring text
         D211 = 'CONVENTION', # blank line before class docstring
         D212 = None, # (conflicts D213) multi-line summary not on first line
         D213 = 'CONVENTION', # docstring multi-line summary not on first line 
@@ -1037,7 +1038,7 @@ RUFF_LINTS = dict(
         PLW0406 = 'WARN', # module imports itself
 
         PLW0602 = 'WARN', # global variable not assigned
-        PLW0603 = 'REFACTOR', # global variable updated in function
+        PLW0603 = None, # global variable updated in function
         PLW0604 = 'REFACTOR', # redundant global variable at module level
 
         PLW0642 = 'REFACTOR', # reassignment of `self` or `class`
@@ -1219,6 +1220,9 @@ if is_in_path("ruff"):
             "shebang:/usr/bin/python",
             "shebang:/usr/bin/python3",
             "shebang:/usr/bin/python3.9",
+            "shebang:/usr/bin/env python",
+            "shebang:/usr/bin/env python3",
+            "shebang:/usr/bin/env python3.9",
         }
         DISABLE_TAGS: set[str] = set()
 

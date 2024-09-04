@@ -38,26 +38,26 @@ _COLORS = [
     "RESET",
 ]
 
-_COLOR_ASCII_CODES = dict(
-    BLACK="\x1b[30m",
-    RED="\x1b[31m",
-    GREEN="\x1b[32m",
-    YELLOW="\x1b[33m",
-    BLUE="\x1b[34m",
-    MAGENTA="\x1b[35m",
-    CYAN="\x1b[36m",
-    WHITE="\x1b[37m",
-    BRIGHT_BLACK="\x1b[90m",
-    BRIGHT_RED="\x1b[91m",
-    BRIGHT_GREEN="\x1b[92m",
-    BRIGHT_YELLOW="\x1b[93m",
-    BRIGHT_BLUE="\x1b[94m",
-    BRIGHT_MAGENTA="\x1b[95m",
-    BRIGHT_CYAN="\x1b[96m",
-    BRIGHT_WHITE="\x1b[97m",
-    RESET="\x1b[0m",
-    BOLD="\x1b[1m",
-)
+_COLOR_ASCII_CODES = {
+    "BLACK": "\x1b[30m",
+    "RED": "\x1b[31m",
+    "GREEN": "\x1b[32m",
+    "YELLOW": "\x1b[33m",
+    "BLUE": "\x1b[34m",
+    "MAGENTA": "\x1b[35m",
+    "CYAN": "\x1b[36m",
+    "WHITE": "\x1b[37m",
+    "BRIGHT_BLACK": "\x1b[90m",
+    "BRIGHT_RED": "\x1b[91m",
+    "BRIGHT_GREEN": "\x1b[92m",
+    "BRIGHT_YELLOW": "\x1b[93m",
+    "BRIGHT_BLUE": "\x1b[94m",
+    "BRIGHT_MAGENTA": "\x1b[95m",
+    "BRIGHT_CYAN": "\x1b[96m",
+    "BRIGHT_WHITE": "\x1b[97m",
+    "RESET": "\x1b[0m",
+    "BOLD": "\x1b[1m",
+}
 
 _COLOR_GLOBALS = globals()
 
@@ -81,9 +81,11 @@ RESET: str
 BOLD: str
 
 
-def set_colors_enabled(enabled: bool):
-    """sets color globals to ANSI color codes if `enabled` otherwise sets them
-    to empty strings"""
+def set_colors_enabled(enabled: bool) -> None:
+    """Set color globals to ANSI color codes
+
+    If not enabled,  sets them to empty strings
+    """
     for color in _COLORS:
         if enabled:
             _COLOR_GLOBALS[color] = _COLOR_ASCII_CODES[color]
