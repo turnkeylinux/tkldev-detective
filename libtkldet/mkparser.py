@@ -161,7 +161,7 @@ class MutMakefileData:
             for key in keys:
                 done = True
                 values = self.variables[key]
-                new_values = []
+                new_values: list[str | LazyVar] = []
                 for value in values:
                     if isinstance(value, str):
                         new_values.append(value)

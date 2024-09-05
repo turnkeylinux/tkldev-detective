@@ -22,7 +22,7 @@ code here provides ability to "classify" different files
 """
 
 from dataclasses import dataclass
-from typing import Generator, Iterable, cast
+from typing import Generator, Iterable, Iterator, cast
 from os.path import dirname
 
 
@@ -62,9 +62,17 @@ class Item:
         return tag in self.tags
 
     def has_tag_type(self, tag_type: str) -> bool:
-        """Checks if item contains a variant tag of a given type"""
+        """Check if item contains a variant tag of a given type"""
         check = tag_type + ':'
         return any(tag.startswith(check) for tag in self.tags)
+
+    def tags_with_type(self, tag_type: str) -> Iterator[str]:
+        """Return all tags with a variant tag of a given type"""
+        check = tag_type + ':'
+        return filter(
+            lambda tag: tag.startswith(check),
+            self.tags
+        )
 
     def pretty_print(self) -> None:
         """Show item value as well as tags"""

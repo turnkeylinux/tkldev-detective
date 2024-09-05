@@ -19,6 +19,9 @@
 from libtkldet.classifier import FileClassifier, FileItem, register_classifier
 from os.path import splitext, isfile
 from typing import ClassVar
+from logging import getLogger
+
+logger = getLogger(__name__)
 
 @register_classifier
 class FiletypeClassifier(FileClassifier):
@@ -50,13 +53,18 @@ class ShebangClassifier(FileClassifier):
                         other_parts = shebang.split()
                         shebang = other_parts.pop(0)
 
-            other_parts = [part.decode() for part in other_parts]
-            shebang = shebang.decode().strip()
+            try:
+                other_parts = [part.decode() for part in other_parts]
+                shebang = shebang.decode().strip()
+            except UnicodeDecodeError:
+                logger.debug("failed to decode shebang", exc_info=True)
+                item.add_tags(self, ['not-utf8'])
+            else:
 
-            if shebang.startswith("#!"):
-                if shebang == '#!/usr/bin/env':
-                    item.add_tags(self, [
-                        f"shebang:{shebang[2:]} {other_parts[0]}"
-                    ])
-                else:
-                    item.add_tags(self, [f"shebang:{shebang[2:]}"])
+                if shebang.startswith("#!"):
+                    if shebang == '#!/usr/bin/env':
+                        item.add_tags(self, [
+                            f"shebang:{shebang[2:]} {other_parts[0]}"
+                        ])
+                    else:
+                        item.add_tags(self, [f"shebang:{shebang[2:]}"])

@@ -24,8 +24,11 @@ from typing import Generator
 
 from .error import ApplianceNotFoundError
 
+from logging import getLogger
+
 PRODUCTS_DIR = "/turnkey/fab/products"
 
+logger = getLogger(__name__)
 
 def is_appliance_path(path: str) -> bool:
     """ is path, a path to an appliance? """
@@ -37,7 +40,7 @@ def is_appliance_path(path: str) -> bool:
 
 def is_appliance_name(name: str) -> bool:
     """ is name, the name of an existing appliance on tkldev? """
-    return "/" not in name and isdir(join(PRODUCTS_DIR, name))
+    return name != '.' and "/" not in name and isdir(join(PRODUCTS_DIR, name))
 
 
 def is_inside_appliance(path: str) -> bool:
@@ -68,6 +71,7 @@ def get_appliance_root(path: str) -> str:
         root = join(PRODUCTS_DIR, appliance_name)
 
     if root is None or not isfile(join(root, "Makefile")):
+        logger.info('lint root is not an appliance')
         error_message = (
             "input does not appear to be an appliance name, path to an appliance"
             " or path to a file inside of an appliance"
@@ -83,10 +87,16 @@ def locator(root: str, ignore_non_appliance: bool) -> Generator[str, None, None]
     or a specific file only if given a path to a file inside an appliance
     """
     if is_appliance_name(root):
+        logger.debug('locator(_) # is appliance name')
         yield from full_appliance_locator(join(PRODUCTS_DIR, root))
     elif is_appliance_path(root):
+        logger.debug('locator(_) # is appliance path')
         yield from full_appliance_locator(root)
-    elif is_inside_appliance(root) or ignore_non_appliance:
+    elif is_inside_appliance(root):
+        logger.debug('locator(_) # is inside appliance')
+        yield from full_appliance_locator(get_appliance_root(root))
+    elif ignore_non_appliance:
+        logger.debug('locator(_) # is not an appliance (but ignore_non_appliance set)')
         yield from everything_locator(root)
     else:
         error_message = (
@@ -100,7 +110,7 @@ def everything_locator(root: str) -> Generator[str, None, None]:
     if isfile(root):
         yield root
     else:
-        yield from iglob(join(root, '**'), recursive=True)
+        yield from iglob(join(root, '**'), recursive=True, include_hidden=True)
 
 def full_appliance_locator(root: str) -> Generator[str, None, None]:
     """Yield (pretty much) every file in an appliance of potential concern"""

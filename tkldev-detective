@@ -18,6 +18,7 @@
 from argparse import ArgumentParser
 from os.path import relpath, abspath
 from typing import Generator
+import logging
 import sys
 
 from libtkldet import locator, modman, colors
@@ -28,6 +29,7 @@ from libtkldet.error import ApplianceNotFoundError
 import libtkldet.classifier
 import libtkldet.linter
 
+logger = logging.getLogger('tkldev-detective')
 
 def perform_lint(
     root_path: str, dump_tags: bool, skip_lint: bool, ignore_non_appliance: bool
@@ -52,6 +54,9 @@ def perform_lint(
         for classifier in all_classifiers:
             classifier.classify(item)
             if item.has_tag_type('ignore'):
+                logger.info(f'item "%s" skipped (tagged with %s)',
+                            item.abspath,
+                            ', '.join(map(repr, item.tags_with_type('ignore'))))
                 ignore = True
                 break
         if ignore:
@@ -69,6 +74,8 @@ def perform_lint(
 if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument("--color", choices=["always", "never", "auto"], default="auto")
+    parser.add_argument("--log-level", choices=["debug", "info", "warn",
+                                                "error"], default="warn")
     subparsers = parser.add_subparsers(dest="action")
 
     list_parser = subparsers.add_parser("list")
@@ -98,6 +105,18 @@ if __name__ == "__main__":
     )
 
     args = parser.parse_args()
+
+    log_level = logging.WARNING
+    if args.log_level == "debug":
+        log_level = logging.DEBUG
+    elif args.log_level == "info":
+        log_level = logging.INFO
+    elif args.log_level == "warn":
+        log_level = logging.WARNING
+    elif args.log_level == "error":
+        log_level = logging.ERROR
+
+    logging.basicConfig(level=log_level)
 
     if args.color == "auto":
         colors.set_colors_enabled(sys.stdout.isatty())
@@ -132,7 +151,7 @@ if __name__ == "__main__":
             ):
                 print("\n|   ".join(report.format().split("\n")))
                 print()
-        except libtkldet.error.PlanNotFound as e:
+        except libtkldet.error.PlanNotFoundError as e:
             print(
                 colors.RED
                 + "error: "
