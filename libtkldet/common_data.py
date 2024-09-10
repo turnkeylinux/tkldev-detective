@@ -29,6 +29,7 @@ _PLAN_RESOLVE_CACHE: list[PlanEntry] = []
 _INCLUDED_PLAN_CACHE: set[str] = set()
 _FAB_DATA: CommonFabBuildData
 
+
 def initialize_common_data(appliance_root: str) -> None:
     """Parse plan & makefile and initialize data which utilizes it"""
     global APPLIANCE_ROOT, _FAB_DATA
@@ -48,9 +49,9 @@ def initialize_common_data(appliance_root: str) -> None:
 def is_package_to_be_installed(package_name: str) -> bool:
     """Check if an apt package will be installed via plan"""
     return any(
-        entry.package_name == package_name
-        for entry in _PLAN_RESOLVE_CACHE
+        entry.package_name == package_name for entry in _PLAN_RESOLVE_CACHE
     )
+
 
 def is_common_plan_included(plan_name: str) -> bool:
     """Check if a common plan (by file name) is included in appliance build"""
@@ -61,7 +62,9 @@ def iter_packages() -> Iterator[PackageItem]:
     """Iterate over all packages which will be installed"""
     for entry in _PLAN_RESOLVE_CACHE:
         yield PackageItem(
-            value=entry.package_name, _tags={}, plan_stack=entry.include_stack[:]
+            value=entry.package_name,
+            _tags={},
+            plan_stack=entry.include_stack[:],
         )
 
 
@@ -95,7 +98,10 @@ def get_path_in_common_overlay(path: str) -> str | None:
     path = path.lstrip("/")
     for common in _FAB_DATA.overlays:
         common_path = join(
-            os.getenv("FAB_PATH", "/turnkey/fab"), "common/overlays", common, path
+            os.getenv("FAB_PATH", "/turnkey/fab"),
+            "common/overlays",
+            common,
+            path,
         )
         if isfile(common_path):
             return common_path

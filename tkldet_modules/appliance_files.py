@@ -23,6 +23,7 @@ from libtkldet.classifier import (
 )
 from typing import ClassVar
 
+
 @register_classifier
 class ApplianceMakefileClassifier(ExactPathClassifier):
     """Classifies appliance Makefile"""

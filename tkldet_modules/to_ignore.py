@@ -20,13 +20,15 @@ from libtkldet.classifier import FileClassifier, FileItem, register_classifier
 import os.path
 from typing import ClassVar
 
+
 def is_or_has_ancestor_dir(path: str, directory: str) -> bool:
     """Checks if path has an ancestor directory with a given name"""
-    while path not in ('/', ''):
+    while path not in ("/", ""):
         path, path_segment = os.path.split(path)
         if path_segment == directory:
             return True
     return False
+
 
 @register_classifier
 class FiletypeClassifier(FileClassifier):
@@ -35,8 +37,7 @@ class FiletypeClassifier(FileClassifier):
     WEIGHT: ClassVar[int] = 5
 
     def classify(self, item: FileItem) -> None:
-
-        if is_or_has_ancestor_dir(item.abspath, '__pycache__'):
-            item.add_tags(self, ['ignore:__pycache__'])
-        if is_or_has_ancestor_dir(item.abspath, '.git'):
-            item.add_tags(self, ['ignore:.git'])
+        if is_or_has_ancestor_dir(item.abspath, "__pycache__"):
+            item.add_tags(self, ["ignore:__pycache__"])
+        if is_or_has_ancestor_dir(item.abspath, ".git"):
+            item.add_tags(self, ["ignore:.git"])

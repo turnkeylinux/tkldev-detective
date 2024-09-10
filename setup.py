@@ -9,5 +9,5 @@ setup(
     author_email="stefan@turnkeylinux.org",
     url="https://github.com/turnkeylinux/tkldev-detective",
     packages=["libtkldet"],
-    scripts=["tkldev-detective"]
+    scripts=["tkldev-detective"],
 )

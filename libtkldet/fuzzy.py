@@ -36,9 +36,8 @@ def fuzzy_diff(x: str, y: str) -> int:
 
 
 def fuzzy_suggest(
-        check: str,
-        options: list[str],
-        max_diff: int=MAX_DIFF) -> str | None:
+    check: str, options: list[str], max_diff: int = MAX_DIFF
+) -> str | None:
     """Suggest a string from given options
 
     Given a 'check' value, and a list of valid options, find the option

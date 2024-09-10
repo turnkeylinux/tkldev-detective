@@ -20,6 +20,7 @@ Encapsulates "Linter"s
 
 code here provides interface for modules to provide linting
 """
+
 from typing import ClassVar, Iterator
 
 from .classifier import Item, FileItem

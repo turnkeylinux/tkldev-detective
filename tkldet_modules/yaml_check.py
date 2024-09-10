@@ -25,6 +25,7 @@ from typing import Generator
 from libtkldet.linter import FileLinter, FileItem, register_linter
 from libtkldet.report import Report, FileReport, ReportLevel
 
+
 class YamlLinter(FileLinter):
     ENABLE_TAGS: set[str] = {"ext:yaml", "ext:yml"}
     DISABLE_TAGS: set[str] = set()
@@ -58,6 +59,7 @@ class YamlLinter(FileLinter):
                     source="yaml_check",
                     level=ReportLevel.ERROR,
                 )
+
 
 if YAML:
     register_linter(YamlLinter)

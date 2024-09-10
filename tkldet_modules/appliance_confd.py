@@ -33,7 +33,9 @@ class ApplianceConfDLinter(FileLinter):
     def check(self, item: FileItem) -> Generator[Report, None, None]:
         mode = os.lstat(item.abspath).st_mode
         if not (
-            (mode & stat.S_IXUSR) or (mode & stat.S_IXGRP) or (mode & stat.S_IXOTH)
+            (mode & stat.S_IXUSR)
+            or (mode & stat.S_IXGRP)
+            or (mode & stat.S_IXOTH)
         ):
             yield FileReport(
                 item=item,

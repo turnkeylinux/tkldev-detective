@@ -23,6 +23,7 @@ functions, doesn't understand targets, makes more unspoken assumptions and
 probably produces a lot of other erroneous output (if used for general
 makefile parsing)
 """
+
 import typing
 from dataclasses import dataclass
 import os
@@ -30,29 +31,31 @@ import os
 ASSIGNMENT_OPERATORS = ["?=", ":=", "+=", "="]
 CHECKS = ["ifeq", "ifneq", "ifdef", "ifndef"]
 MAKEFILE_ENV = {
-    "FAB_PATH": os.environ.get("FAB_PATH", '/turnkey/fab'),
-    "FAB_SHARE_PATH": "/usr/share/fab"
+    "FAB_PATH": os.environ.get("FAB_PATH", "/turnkey/fab"),
+    "FAB_SHARE_PATH": "/usr/share/fab",
 }
+
 
 def split_value(raw: str) -> list[str]:
     """Split value by space"""
-    chunks = ['']
+    chunks = [""]
     bracket_depth = 0
     for c in raw:
-        if c == ')':
+        if c == ")":
             bracket_depth -= 1
-            chunks[-1] += ')'
-        elif c == '(':
+            chunks[-1] += ")"
+        elif c == "(":
             bracket_depth += 1
-            chunks[-1] += '('
+            chunks[-1] += "("
         elif bracket_depth > 0:
             chunks[-1] += c
         elif c.isspace() and chunks[-1]:
-            chunks.append('')
+            chunks.append("")
         else:
             chunks[-1] += c
 
     return chunks
+
 
 def parse_assignment(line: str) -> tuple[str, str, str] | None:
     """Parse assignment line
@@ -78,13 +81,16 @@ class CommonFabBuildData:
     removelists: list[str]
     removelists_final: list[str]
 
+
 @dataclass
 class LazyVar:
     """A value referencing a variable we haven't resolved yet"""
 
     name: str
 
+
 ValueList = list[str | LazyVar]
+
 
 @dataclass
 class MutMakefileData:
@@ -105,8 +111,9 @@ class MutMakefileData:
             if var_name in MAKEFILE_ENV:
                 out_var.append(MAKEFILE_ENV[var_name])
             else:
-                out_var.extend(self.variables.get(var_name,
-                    [LazyVar(var_name)]))
+                out_var.extend(
+                    self.variables.get(var_name, [LazyVar(var_name)])
+                )
         else:
             out_var.extend(split_value(value))
         return out_var
@@ -135,7 +142,7 @@ class MutMakefileData:
             error_message = f"unknown operator {operator!r}"
             raise ValueError(error_message)
 
-    def finish(self) -> 'MakefileData':
+    def finish(self) -> "MakefileData":
         """Return concrete class
 
         Resolve unresolved variables and return a concrete version of this
@@ -166,20 +173,22 @@ class MutMakefileData:
                     if isinstance(value, str):
                         new_values.append(value)
                     elif isinstance(value, LazyVar):
-                        new_v = self.variables.get(value.name,
-                                [f'$({value.name})'])
-                        if isinstance(new_v , LazyVar):
+                        new_v = self.variables.get(
+                            value.name, [f"$({value.name})"]
+                        )
+                        if isinstance(new_v, LazyVar):
                             done = False
                         new_values.extend(new_v)
                 self.variables[key] = new_values
 
-        new_variables = {key: list(values) for key, values in
-                self.variables.items()}
+        new_variables = {
+            key: list(values) for key, values in self.variables.items()
+        }
         new_included = list(self.included)
         return MakefileData(
-            typing.cast(dict[str, list[str]], new_variables),
-            new_included
+            typing.cast(dict[str, list[str]], new_variables), new_included
         )
+
 
 @dataclass
 class MakefileData(MutMakefileData):
@@ -206,17 +215,14 @@ class MakefileData(MutMakefileData):
 
     def to_dict(self) -> dict:
         """Return contents as a dictionary"""
-        return {
-            'variables': self.variables,
-            'included': self.included
-        }
+        return {"variables": self.variables, "included": self.included}
 
 
 # ignore warnings about complexity, this is just a complex job and breaking it
 # down further would only obfuscate what it's doing.
-def parse_makefile( # noqa: C901, PLR0912
+def parse_makefile(  # noqa: C901, PLR0912
     path: str, makefile_data: MakefileData | None = None
-    ) -> MakefileData:
+) -> MakefileData:
     """Get all variables in makefile including included makefiles
 
     Attempts to naively get all variables defined in makefile tree. This

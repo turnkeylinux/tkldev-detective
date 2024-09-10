@@ -42,14 +42,22 @@ if is_installed("pylint") and not is_in_path("ruff"):
         def check(self, item: FileItem) -> Generator[Report, None, None]:
             for report in json.loads(
                 subprocess.run(
-                    ["/usr/bin/pylint", item.abspath, "-f", "json", "--rcfile", rcfile],
+                    [
+                        "/usr/bin/pylint",
+                        item.abspath,
+                        "-f",
+                        "json",
+                        "--rcfile",
+                        rcfile,
+                    ],
                     capture_output=True,
                     text=True,
                 ).stdout
             ):
-
                 if report["obj"]:
-                    location_metadata = f'{report["obj"]} in module {report["module"]}'
+                    location_metadata = (
+                        f'{report["obj"]} in module {report["module"]}'
+                    )
                 else:
                     location_metadata = f'in base of module {report["module"]}'
 

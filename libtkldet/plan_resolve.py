@@ -20,7 +20,9 @@
 from os.path import join, isfile
 from dataclasses import dataclass
 from .error import (
-        PlanNotFoundError, UnknownPlanDirectiveError, InvalidPlanError
+    PlanNotFoundError,
+    UnknownPlanDirectiveError,
+    InvalidPlanError,
 )
 
 static_vars = {"KERNEL": "", "DEBIAN": "", "AMD64": ""}
@@ -96,7 +98,8 @@ def _remove_multiline_comments(raw: str) -> str:
 # - PLW2901 (iteration variable overwritten), variable's meaning does not
 #       change with overwrite.
 
-def _parse_plan( # noqa: C901, PLR0912
+
+def _parse_plan(  # noqa: C901, PLR0912
     path: str, include_paths: list[str], plan_stack: list[str] | None = None
 ) -> list[PlanEntry]:
     """Parse a plan
@@ -128,21 +131,22 @@ def _parse_plan( # noqa: C901, PLR0912
     for line in data.splitlines():
         # remove single line comment
         if "//" in line:
-            line = line.split("//", 1)[0] # noqa: PLW2901
+            line = line.split("//", 1)[0]  # noqa: PLW2901
         # honestly would've thought hashes in cpp code wouldn't work like this,
         # but apparently it does
         if not line.startswith("#") and "#" in line:
-            line = line.split("#", 1)[0] # noqa: PLW2901
+            line = line.split("#", 1)[0]  # noqa: PLW2901
 
-        line = line.strip() # noqa: PLW2901
+        line = line.strip()  # noqa: PLW2901
 
         if not line:
             continue
 
         if line.startswith("#endif"):
             if not cond_stack:
-                error_message = \
-                        f"unbalanced #if* and #endif directives in plan {path}"
+                error_message = (
+                    f"unbalanced #if* and #endif directives in plan {path}"
+                )
                 raise InvalidPlanError(error_message)
             cond_stack.pop()
             continue
@@ -162,7 +166,9 @@ def _parse_plan( # noqa: C901, PLR0912
             elif line.startswith("#include"):
                 packages.extend(
                     _include_plan(
-                        line[8:].strip().strip("<>"), include_paths, plan_stack[:]
+                        line[8:].strip().strip("<>"),
+                        include_paths,
+                        plan_stack[:],
                     )
                 )
             elif line.startswith("#"):

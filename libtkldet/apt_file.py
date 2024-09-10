@@ -23,19 +23,23 @@ installed
 
 import subprocess
 
+
 def is_in_path(name: str) -> bool:
     """Check if a given name is in the path"""
-    in_path = subprocess.run(
-        ["/usr/bin/which", name],
-        capture_output=True
-    )
+    in_path = subprocess.run(["/usr/bin/which", name], capture_output=True)
     return in_path.returncode == 0
+
 
 def is_installed(package_name: str) -> bool:
     """Check if a given package is installed on the HOST system (tkldev)"""
     pkg_installed = subprocess.run(
-        ["/usr/bin/dpkg-query", "-W", "--showformat='${Status}'", package_name],
-        capture_output=True
+        [
+            "/usr/bin/dpkg-query",
+            "-W",
+            "--showformat='${Status}'",
+            package_name,
+        ],
+        capture_output=True,
     )
     return pkg_installed.returncode != 0
 

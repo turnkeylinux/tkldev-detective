@@ -17,7 +17,10 @@
 
 """Utilities relating to classification/linting files"""
 
-def position_from_char_offset(path: str, offset: int) -> tuple[int, int] | None:
+
+def position_from_char_offset(
+    path: str, offset: int
+) -> tuple[int, int] | None:
     """Get column/line from offset into file
 
     Given an offset into a file, returns the line and column numbers
@@ -39,7 +42,9 @@ def position_from_char_offset(path: str, offset: int) -> tuple[int, int] | None:
     return None
 
 
-def position_from_byte_offset(path: str, offset: int) -> tuple[int, int] | None:
+def position_from_byte_offset(
+    path: str, offset: int
+) -> tuple[int, int] | None:
     """Get column/line from offset into file in binary mode
 
     Given an offset into a file (in binary mode), returns the line and column

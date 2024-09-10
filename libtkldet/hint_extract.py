@@ -16,6 +16,7 @@
 # tkldev-detective. If not, see <https://www.gnu.org/licenses/>.
 
 """Utilities for annotating parts of files"""
+
 from . import colors as co
 
 H_PAD = 6  # padding (for hint lines to account for line numbers)
@@ -24,7 +25,7 @@ H_PAD = 6  # padding (for hint lines to account for line numbers)
 def extract_line(path: str, row: int) -> str:
     """Extract a single line from a file"""
     with open(path, "r") as fob:
-        for (i, line) in enumerate(fob):
+        for i, line in enumerate(fob):
             if i == row:
                 return (
                     str(i + 1).rjust(4)
@@ -38,10 +39,15 @@ def extract_line(path: str, row: int) -> str:
 
 def extract_line_col(path: str, row: int, col: int) -> list[str]:
     """Annotate line with specific column"""
-    return [extract_line(path, row), co.RED + "^".rjust(col + H_PAD + 1) + co.RESET]
+    return [
+        extract_line(path, row),
+        co.RED + "^".rjust(col + H_PAD + 1) + co.RESET,
+    ]
 
 
-def extract_line_cols(path: str, row: int, col_span: tuple[int, int]) -> list[str]:
+def extract_line_cols(
+    path: str, row: int, col_span: tuple[int, int]
+) -> list[str]:
     """Annotate line with span of columns"""
     min_col, max_col = col_span
     return [
@@ -59,7 +65,7 @@ def extract_lines(path: str, row_span: tuple[int, int]) -> list[str]:
     min_row, max_row = row_span
     out = []
     with open(path, "r") as fob:
-        for (i, line) in enumerate(fob):
+        for i, line in enumerate(fob):
             if i in (min_row, max_row):
                 out.append(
                     co.RED
@@ -91,7 +97,7 @@ def extract_lines_cols(
     min_col, max_col = col_span
     out = []
     with open(path, "r") as fob:
-        for (i, line) in enumerate(fob):
+        for i, line in enumerate(fob):
             if min_row <= i <= max_row:
                 out.append(
                     str(i + 1).rjust(4)

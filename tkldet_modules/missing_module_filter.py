@@ -20,7 +20,10 @@ from typing import Generator
 from libtkldet.report import Report, ReportLevel, register_filter, ReportFilter
 from libtkldet.linter import FileItem
 from libtkldet.apt_file import find_python_package_from_import
-from libtkldet.common_data import is_package_to_be_installed, get_path_in_common_overlay
+from libtkldet.common_data import (
+    is_package_to_be_installed,
+    get_path_in_common_overlay,
+)
 from os.path import dirname
 import re
 
@@ -55,9 +58,7 @@ def filter_packaged(report: Report, module_name: str) -> Report | None:
         if not package_installed:
             if len(packages) > 1:
                 packages_str = ", ".join('"' + pkg + '"' for pkg in packages)
-                modified_message += (
-                    f" (perhaps you meant to add one of {packages_str} to the plan?)"
-                )
+                modified_message += f" (perhaps you meant to add one of {packages_str} to the plan?)"
             else:
                 modified_message += (
                     f' (perhaps you meant to add "{packages[0]}" to the plan?)'
@@ -82,7 +83,8 @@ class MissingModuleFilter(ReportFilter):
 
             if (
                 isinstance(report.item, FileItem)
-                and dirname(report.item.relpath) == "overlay/usr/lib/inithooks/bin"
+                and dirname(report.item.relpath)
+                == "overlay/usr/lib/inithooks/bin"
             ):
                 temp_module_name = module_name
                 if "." in temp_module_name:

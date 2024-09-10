@@ -19,6 +19,7 @@
 
 these are issues, warnings or notes about "Item"s produced by "Linter"s
 """
+
 from dataclasses import dataclass
 from enum import Enum
 import enum
@@ -203,7 +204,11 @@ class FileReport(Report):
             if self.line:
                 out += f"@{self.item.relpath} +{self.line}\n"
                 out += (
-                    "\n".join(format_extract(self.item.abspath, self.line, self.column))
+                    "\n".join(
+                        format_extract(
+                            self.item.abspath, self.line, self.column
+                        )
+                    )
                     + "\n"
                 )
             else:
@@ -276,8 +281,7 @@ def register_filter(filt: type[ReportFilter]) -> type[ReportFilter]:
 def get_weighted_filters() -> list[ReportFilter]:
     """Return instances of registered filters in order of weight"""
     return sorted(
-        (x() for x in _FILTERS),
-        key=lambda x: (x.WEIGHT, x.__class__.__name__)
+        (x() for x in _FILTERS), key=lambda x: (x.WEIGHT, x.__class__.__name__)
     )
 
 

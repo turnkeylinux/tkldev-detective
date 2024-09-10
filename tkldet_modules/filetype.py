@@ -23,6 +23,7 @@ from logging import getLogger
 
 logger = getLogger(__name__)
 
+
 @register_classifier
 class FiletypeClassifier(FileClassifier):
     """Classify files by extension"""
@@ -58,12 +59,12 @@ class ShebangClassifier(FileClassifier):
                 shebang = shebang.decode().strip()
             except UnicodeDecodeError:
                 logger.debug("failed to decode shebang", exc_info=True)
-                item.add_tags(self, ['not-utf8'])
+                item.add_tags(self, ["not-utf8"])
             else:
                 if shebang.startswith("#!"):
-                    if shebang == '#!/usr/bin/env':
-                        item.add_tags(self, [
-                            f"shebang:{shebang[2:]} {other_parts[0]}"
-                        ])
+                    if shebang == "#!/usr/bin/env":
+                        item.add_tags(
+                            self, [f"shebang:{shebang[2:]} {other_parts[0]}"]
+                        )
                     else:
                         item.add_tags(self, [f"shebang:{shebang[2:]}"])

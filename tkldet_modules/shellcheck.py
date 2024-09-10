@@ -19,18 +19,22 @@ from typing import Generator
 import subprocess
 
 from libtkldet.linter import FileLinter, FileItem, register_linter
-from libtkldet.report import Report, FileReport, parse_report_level, Replacement
+from libtkldet.report import (
+    Report,
+    FileReport,
+    parse_report_level,
+    Replacement,
+)
 from libtkldet.apt_file import is_installed
 
 if is_installed("shellcheck"):
+
     def insert_str(v: str, i: int, instr: str) -> str:
         return v[:i] + instr + v[i:]
-
 
     def expand_lines(lines: list[str]) -> Generator[str, None, None]:
         for line in lines:
             yield from line.splitlines()
-
 
     def format_replacement(
         path: str,
@@ -57,16 +61,19 @@ if is_installed("shellcheck"):
             if replacement["insertionPoint"] == "beforeStart":
                 line = replacement["line"] - start_line - 1
                 lines[line] = insert_str(
-                    lines[line], replacement["column"], replacement["replacement"]
+                    lines[line],
+                    replacement["column"],
+                    replacement["replacement"],
                 )
             elif replacement["insertionPoint"] == "afterEnd":
                 line = replacement["endLine"] - start_line - 1
                 lines[line] = insert_str(
-                    lines[line], replacement["endColumn"] - 1, replacement["replacement"]
+                    lines[line],
+                    replacement["endColumn"] - 1,
+                    replacement["replacement"],
                 )
 
         return Replacement(start_line, end_line, expand_lines(lines))
-
 
     @register_linter
     class Shellcheck(FileLinter):

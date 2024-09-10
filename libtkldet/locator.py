@@ -30,8 +30,9 @@ PRODUCTS_DIR = "/turnkey/fab/products"
 
 logger = getLogger(__name__)
 
+
 def is_appliance_path(path: str) -> bool:
-    """ is path, a path to an appliance? """
+    """is path, a path to an appliance?"""
     path = normpath(path)
     if path == join(PRODUCTS_DIR, basename(path)):
         return isfile(join(path, "Makefile"))
@@ -39,17 +40,19 @@ def is_appliance_path(path: str) -> bool:
 
 
 def is_appliance_name(name: str) -> bool:
-    """ is name, the name of an existing appliance on tkldev? """
-    return name != '.' and "/" not in name and isdir(join(PRODUCTS_DIR, name))
+    """is name, the name of an existing appliance on tkldev?"""
+    return name != "." and "/" not in name and isdir(join(PRODUCTS_DIR, name))
 
 
 def is_inside_appliance(path: str) -> bool:
-    """ is path, a path to a file inside an appliance """
+    """is path, a path to a file inside an appliance"""
     path = normpath(path)
     if not path.startswith(PRODUCTS_DIR + "/"):
         return False
     path = path[len(PRODUCTS_DIR) + 1 :]
-    return bool(path)  # if path is non-zero length, it must be a path into an appliance
+    return bool(
+        path
+    )  # if path is non-zero length, it must be a path into an appliance
 
 
 def get_appliance_root(path: str) -> str:
@@ -71,7 +74,7 @@ def get_appliance_root(path: str) -> str:
         root = join(PRODUCTS_DIR, appliance_name)
 
     if root is None or not isfile(join(root, "Makefile")):
-        logger.info('lint root is not an appliance')
+        logger.info("lint root is not an appliance")
         error_message = (
             "input does not appear to be an appliance name, path to an appliance"
             " or path to a file inside of an appliance"
@@ -87,16 +90,18 @@ def locator(root: str, ignore_non_appliance: bool) -> Iterator[str]:
     or a specific file only if given a path to a file inside an appliance
     """
     if is_appliance_name(root):
-        logger.debug('locator(_) # is appliance name')
+        logger.debug("locator(_) # is appliance name")
         yield from full_appliance_locator(join(PRODUCTS_DIR, root))
     elif is_appliance_path(root):
-        logger.debug('locator(_) # is appliance path')
+        logger.debug("locator(_) # is appliance path")
         yield from full_appliance_locator(root)
     elif is_inside_appliance(root):
-        logger.debug('locator(_) # is inside appliance')
+        logger.debug("locator(_) # is inside appliance")
         yield from full_appliance_locator(get_appliance_root(root))
     elif ignore_non_appliance:
-        logger.debug('locator(_) # is not an appliance (but ignore_non_appliance set)')
+        logger.debug(
+            "locator(_) # is not an appliance (but ignore_non_appliance set)"
+        )
         yield from everything_locator(root)
     else:
         error_message = (
@@ -105,17 +110,20 @@ def locator(root: str, ignore_non_appliance: bool) -> Iterator[str]:
         )
         raise ApplianceNotFoundError(error_message)
 
+
 def everything_locator(root: str) -> Iterator[str]:
     """Yield everything, appliance or not"""
     if isfile(root):
         yield root
     else:
-        yield from iglob(join(root, '**'), recursive=True, include_hidden=True)
+        yield from iglob(join(root, "**"), recursive=True, include_hidden=True)
+
 
 def full_appliance_locator(root: str) -> Iterator[str]:
     """Yield (pretty much) every file in an appliance of potential concern"""
     yield from (
-        join(root, x) for x in ["Makefile", "changelog", "README.rst", "removelist"]
+        join(root, x)
+        for x in ["Makefile", "changelog", "README.rst", "removelist"]
     )
     yield from iter_conf(root)
     yield from iter_plan(root)
@@ -123,15 +131,15 @@ def full_appliance_locator(root: str) -> Iterator[str]:
 
 
 def iter_conf(root: str) -> Iterator[str]:
-    """ yield each conf file in the appliance """
+    """yield each conf file in the appliance"""
     yield from iglob(join(root, "conf.d/*"))
 
 
 def iter_plan(root: str) -> Iterator[str]:
-    """ yield each plan file in the appliance """
+    """yield each plan file in the appliance"""
     yield from iglob(join(root, "plan/*"))
 
 
 def iter_overlay(root: str) -> Iterator[str]:
-    """ yield each file in the appliance overlay"""
+    """yield each file in the appliance overlay"""
     yield from iglob(join(root, "overlay/**"), recursive=True)

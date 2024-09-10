@@ -63,16 +63,13 @@ class Item:
 
     def has_tag_type(self, tag_type: str) -> bool:
         """Check if item contains a variant tag of a given type"""
-        check = tag_type + ':'
+        check = tag_type + ":"
         return any(tag.startswith(check) for tag in self.tags)
 
     def tags_with_type(self, tag_type: str) -> Iterator[str]:
         """Return all tags with a variant tag of a given type"""
-        check = tag_type + ':'
-        return filter(
-            lambda tag: tag.startswith(check),
-            self.tags
-        )
+        check = tag_type + ":"
+        return filter(lambda tag: tag.startswith(check), self.tags)
 
     def pretty_print(self) -> None:
         """Show item value as well as tags"""
@@ -214,5 +211,6 @@ def register_classifier(classifier: type[Classifier]) -> type[Classifier]:
 def get_weighted_classifiers() -> list[Classifier]:
     """Return instances of registered classifiers in order of weight"""
     return sorted(
-        (c() for c in _CLASSIFIERS), key=lambda x: (x.WEIGHT, x.__class__.__name__)
+        (c() for c in _CLASSIFIERS),
+        key=lambda x: (x.WEIGHT, x.__class__.__name__),
     )

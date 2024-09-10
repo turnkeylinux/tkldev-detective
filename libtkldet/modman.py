@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License along with
 # tkldev-detective. If not, see <https://www.gnu.org/licenses/>.
 
-""" handles loading / managing tkldev-detective-modules """
+"""handles loading / managing tkldev-detective-modules"""
 
 import importlib.machinery
 import importlib.util
@@ -27,17 +27,14 @@ from . import colors as co
 from .error import TKLDevDetectiveError
 
 # priortise local tkldet_modules path, fallback to OS path
-MOD_PATH = [ dirname(dirname(abspath(__file__))), '/usr/share/tkldev-detective']
+MOD_PATH = [dirname(dirname(abspath(__file__))), "/usr/share/tkldev-detective"]
 
 
 def _load_all_modules_from_dir(root: str) -> None:
     print(
-        co.BRIGHT_BLACK
-        + co.BOLD
-        + "load all modules from",
-        root +
-        co.RESET,
-        file=sys.stderr
+        co.BRIGHT_BLACK + co.BOLD + "load all modules from",
+        root + co.RESET,
+        file=sys.stderr,
     )
     root = abspath(root)
     for filename in listdir(root):
@@ -51,12 +48,9 @@ def _load_all_modules_from_dir(root: str) -> None:
             spec.loader.exec_module(module)
 
             print(
-                co.BRIGHT_BLACK
-                + co.BOLD
-                + "loaded",
-                spec.name
-                + co.RESET,
-                file=sys.stderr
+                co.BRIGHT_BLACK + co.BOLD + "loaded",
+                spec.name + co.RESET,
+                file=sys.stderr,
             )
 
 
