@@ -53,7 +53,7 @@ def position_from_byte_offset(path: str, offset: int) -> tuple[int, int] | None:
             if i == offset:
                 return line, col
 
-            if char == b"\n":
+            if char == ord(b"\n"):
                 line += 1
                 col = 0
             else:

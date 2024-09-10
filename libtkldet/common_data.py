@@ -18,7 +18,7 @@
 
 import os
 from os.path import join, isfile
-from typing import Generator
+from typing import Iterator
 from .plan_resolve import parse_plan, PlanEntry
 from .locator import iter_plan
 from .classifier import PackageItem
@@ -57,7 +57,7 @@ def is_common_plan_included(plan_name: str) -> bool:
     return join("/turnkey/fab/common/plans", plan_name) in _INCLUDED_PLAN_CACHE
 
 
-def iter_packages() -> Generator[PackageItem, None, None]:
+def iter_packages() -> Iterator[PackageItem]:
     """Iterate over all packages which will be installed"""
     for entry in _PLAN_RESOLVE_CACHE:
         yield PackageItem(

@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License along with
 # tkldev-detective. If not, see <https://www.gnu.org/licenses/>.
 
-from typing import Generator
+from typing import Iterator
 from os.path import relpath, abspath
 from . import locator, common_data, classifier
 from .common_data import APPLIANCE_ROOT
@@ -37,7 +37,7 @@ def initialize(path: str, ignore_non_appliance: bool) -> None:
         common_data.initialize_common_data(root)
 
 
-def yield_appliance_items() -> Generator[classifier.Item, None, None]:
+def yield_appliance_items() -> Iterator[classifier.Item]:
     """Yield everything 'lintable'"""
 
     yield from common_data.iter_packages()

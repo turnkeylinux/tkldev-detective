@@ -20,7 +20,7 @@
 from os.path import join, normpath, basename, isdir, isfile
 from glob import iglob
 
-from typing import Generator
+from typing import Iterator
 
 from .error import ApplianceNotFoundError
 
@@ -80,7 +80,7 @@ def get_appliance_root(path: str) -> str:
     return root
 
 
-def locator(root: str, ignore_non_appliance: bool) -> Generator[str, None, None]:
+def locator(root: str, ignore_non_appliance: bool) -> Iterator[str]:
     """Yield most files inside appliance
 
     Yields almost every file in an appliance of potential concern
@@ -105,14 +105,14 @@ def locator(root: str, ignore_non_appliance: bool) -> Generator[str, None, None]
         )
         raise ApplianceNotFoundError(error_message)
 
-def everything_locator(root: str) -> Generator[str, None, None]:
+def everything_locator(root: str) -> Iterator[str]:
     """Yield everything, appliance or not"""
     if isfile(root):
         yield root
     else:
         yield from iglob(join(root, '**'), recursive=True, include_hidden=True)
 
-def full_appliance_locator(root: str) -> Generator[str, None, None]:
+def full_appliance_locator(root: str) -> Iterator[str]:
     """Yield (pretty much) every file in an appliance of potential concern"""
     yield from (
         join(root, x) for x in ["Makefile", "changelog", "README.rst", "removelist"]
@@ -122,16 +122,16 @@ def full_appliance_locator(root: str) -> Generator[str, None, None]:
     yield from iter_overlay(root)
 
 
-def iter_conf(root: str) -> Generator[str, None, None]:
+def iter_conf(root: str) -> Iterator[str]:
     """ yield each conf file in the appliance """
     yield from iglob(join(root, "conf.d/*"))
 
 
-def iter_plan(root: str) -> Generator[str, None, None]:
+def iter_plan(root: str) -> Iterator[str]:
     """ yield each plan file in the appliance """
     yield from iglob(join(root, "plan/*"))
 
 
-def iter_overlay(root: str) -> Generator[str, None, None]:
+def iter_overlay(root: str) -> Iterator[str]:
     """ yield each file in the appliance overlay"""
     yield from iglob(join(root, "overlay/**"), recursive=True)

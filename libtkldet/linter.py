@@ -20,7 +20,7 @@ Encapsulates "Linter"s
 
 code here provides interface for modules to provide linting
 """
-from typing import Generator
+from typing import ClassVar, Iterator
 
 from .classifier import Item, FileItem
 from .report import Report
@@ -33,14 +33,14 @@ class Linter:
     `DISABLE_TAGS`
     """
 
-    ENABLE_TAGS: set[str]
+    ENABLE_TAGS: ClassVar[set[str]]
     "tags which this linter should work on (or all if omitted)"
-    DISABLE_TAGS: set[str]
+    DISABLE_TAGS: ClassVar[set[str]]
     "tags which this linter should never work on"
 
-    WEIGHT: int = 100
+    WEIGHT: ClassVar[int] = 100
 
-    ItemType: type[Item] = Item
+    ItemType: ClassVar[type[Item]] = Item
 
     def should_check(self, item: Item) -> bool:
         """Actually performs check to see if the linter should run on this item
@@ -71,13 +71,13 @@ class Linter:
                 return False
         return True
 
-    def do_check(self, item: Item) -> Generator[Report, None, None] | None:
+    def do_check(self, item: Item) -> Iterator[Report] | None:
         """Run lint, if `should_check` returns True, used internally"""
         if isinstance(item, self.ItemType) and self.should_check(item):
             return self.check(item)
         return None
 
-    def check(self, item: Item) -> Generator[Report, None, None]:
+    def check(self, item: Item) -> Iterator[Report]:
         """Actually run lint"""
         raise NotImplementedError
 
@@ -87,7 +87,7 @@ class FileLinter(Linter):
 
     ItemType: type[Item] = FileItem
 
-    def check(self, item: Item) -> Generator[Report, None, None]:
+    def check(self, item: Item) -> Iterator[Report]:
         raise NotImplementedError
 
 

@@ -22,7 +22,7 @@ code here provides ability to "classify" different files
 """
 
 from dataclasses import dataclass
-from typing import Generator, Iterable, Iterator, cast
+from typing import Iterator, Iterable, Iterator, cast, ClassVar
 from os.path import dirname
 
 
@@ -45,7 +45,7 @@ class Item:
     exactly how an item got classsified in a certain way """
 
     @property
-    def tags(self) -> Generator[str, None, None]:
+    def tags(self) -> Iterator[str]:
         """Yields all tags, may contain duplicates"""
         for tags in self._tags.values():
             yield from tags
@@ -123,12 +123,12 @@ class Classifier:
     which files.
     """
 
-    WEIGHT: int = 100
+    WEIGHT: ClassVar[int] = 100
     """weight is used to order classifiers, as tthey can read tags as well,
     classifier can leverage information provided (or omitted) by previous
     classifiers"""
 
-    ItemType: type[Item] = Item
+    ItemType: ClassVar[type[Item]] = Item
 
     def do_classify(self, item: Item) -> None:
         """Perform classification
@@ -147,22 +147,22 @@ class Classifier:
 class FileClassifier(Classifier):
     """Specialized classifer which operates on "FileItem"s"""
 
-    ItemType: type[Item] = FileItem
+    ItemType: ClassVar[type[Item]] = FileItem
 
 
 class PackageClassifier(Classifier):
     """Specialized classifier which operates on "PackageItem"s"""
 
-    ItemType: type[Item] = PackageItem
+    ItemType: ClassVar[type[Item]] = PackageItem
 
 
 class ExactPathClassifier(FileClassifier):
     """Classifies an item which matches some exact path"""
 
-    path: str
+    path: ClassVar[str]
     "exact path to match"
 
-    tags: list[str]
+    tags: ClassVar[list[str]]
     "exact tags to add to matched item"
 
     def classify(self, item: Item) -> None:
@@ -177,13 +177,13 @@ class ExactPathClassifier(FileClassifier):
 class SubdirClassifier(FileClassifier):
     """Classifies an item which is inside a given subdirectory"""
 
-    path: str
+    path: ClassVar[str]
     "the parent directory"
 
-    recursive: bool
+    recursive: ClassVar[bool]
     "whether to match a child of any depth or only files directly inside the given dir"
 
-    tags: list[str]
+    tags: ClassVar[list[str]]
     "exact tags to add to matched item"
 
     def classify(self, item: Item) -> None:

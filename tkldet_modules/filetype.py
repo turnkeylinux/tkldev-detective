@@ -60,7 +60,6 @@ class ShebangClassifier(FileClassifier):
                 logger.debug("failed to decode shebang", exc_info=True)
                 item.add_tags(self, ['not-utf8'])
             else:
-
                 if shebang.startswith("#!"):
                     if shebang == '#!/usr/bin/env':
                         item.add_tags(self, [

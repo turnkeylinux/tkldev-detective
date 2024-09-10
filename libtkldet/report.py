@@ -22,7 +22,7 @@ these are issues, warnings or notes about "Item"s produced by "Linter"s
 from dataclasses import dataclass
 from enum import Enum
 import enum
-from typing import Generator, Iterable
+from typing import Iterator, Iterable, ClassVar
 import textwrap
 
 from .classifier import Item, FileItem
@@ -247,9 +247,9 @@ class ReportFilter:
     split, generate or even remove reports
     """
 
-    WEIGHT: int = 100
+    WEIGHT: ClassVar[int] = 100
 
-    def filter(self, report: Report) -> Generator[Report, None, None]:
+    def filter(self, report: Report) -> Iterator[Report]:
         """Given a report filter or modify it
 
         There doesn't need to be a 1-1 relationship between inputs and outputs
@@ -281,7 +281,7 @@ def get_weighted_filters() -> list[ReportFilter]:
     )
 
 
-def filter_all_reports(reports: Iterable[Report]) -> Generator[Report, None, None]:
+def filter_all_reports(reports: Iterable[Report]) -> Iterator[Report]:
     """Filter all reports through all filters in order of weight"""
     filters = get_weighted_filters()
 

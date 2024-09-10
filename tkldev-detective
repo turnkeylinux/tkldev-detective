@@ -54,7 +54,7 @@ def perform_lint(
         for classifier in all_classifiers:
             classifier.classify(item)
             if item.has_tag_type('ignore'):
-                logger.info(f'item "%s" skipped (tagged with %s)',
+                logger.info('item "%s" skipped (tagged with %s)',
                             item.abspath,
                             ', '.join(map(repr, item.tags_with_type('ignore'))))
                 ignore = True
@@ -128,8 +128,14 @@ if __name__ == "__main__":
     all_classifiers = libtkldet.classifier.get_weighted_classifiers()
     all_linters = libtkldet.linter.get_weighted_linters()
 
-    linters_by_name = {l.__class__.__name__: l for l in all_linters}
-    classifiers_by_name = {c.__class__.__name__: c for c in all_classifiers}
+    linters_by_name = {
+        linter.__class__.__name__: linter
+        for linter in all_linters
+    }
+    classifiers_by_name = {
+        classifier.__class__.__name__: classifier
+        for classifier in all_classifiers
+    }
 
     if args.action == "list":
         if args.list_item in ("linters", "all"):
