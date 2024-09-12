@@ -17,14 +17,12 @@
 
 """locates files to be classified and eventually linted"""
 
-from os.path import join, normpath, basename, isdir, isfile
+from collections.abc import Iterator
 from glob import iglob
-
-from typing import Iterator
+from logging import getLogger
+from os.path import basename, isdir, isfile, join, normpath
 
 from .error import ApplianceNotFoundError
-
-from logging import getLogger
 
 PRODUCTS_DIR = "/turnkey/fab/products"
 
@@ -32,7 +30,7 @@ logger = getLogger(__name__)
 
 
 def is_appliance_path(path: str) -> bool:
-    """is path, a path to an appliance?"""
+    """Is path, a path to an appliance?"""
     path = normpath(path)
     if path == join(PRODUCTS_DIR, basename(path)):
         return isfile(join(path, "Makefile"))
@@ -40,12 +38,12 @@ def is_appliance_path(path: str) -> bool:
 
 
 def is_appliance_name(name: str) -> bool:
-    """is name, the name of an existing appliance on tkldev?"""
+    """Is name, the name of an existing appliance on tkldev?"""
     return name != "." and "/" not in name and isdir(join(PRODUCTS_DIR, name))
 
 
 def is_inside_appliance(path: str) -> bool:
-    """is path, a path to a file inside an appliance"""
+    """Is path, a path to a file inside an appliance"""
     path = normpath(path)
     if not path.startswith(PRODUCTS_DIR + "/"):
         return False
@@ -56,7 +54,8 @@ def is_inside_appliance(path: str) -> bool:
 
 
 def get_appliance_root(path: str) -> str:
-    """Get appliance root from path
+    """
+    Get appliance root from path
 
     Given a path to appliance, file inside appliance or appliance name,
     return absolute path to the appliance
@@ -76,15 +75,16 @@ def get_appliance_root(path: str) -> str:
     if root is None or not isfile(join(root, "Makefile")):
         logger.info("lint root is not an appliance")
         error_message = (
-            "input does not appear to be an appliance name, path to an appliance"
-            " or path to a file inside of an appliance"
+            "input does not appear to be an appliance name, path to an"
+            " appliance or path to a file inside of an appliance"
         )
         raise ApplianceNotFoundError(error_message)
     return root
 
 
 def locator(root: str, ignore_non_appliance: bool) -> Iterator[str]:
-    """Yield most files inside appliance
+    """
+    Yield most files inside appliance
 
     Yields almost every file in an appliance of potential concern
     or a specific file only if given a path to a file inside an appliance
@@ -131,15 +131,15 @@ def full_appliance_locator(root: str) -> Iterator[str]:
 
 
 def iter_conf(root: str) -> Iterator[str]:
-    """yield each conf file in the appliance"""
+    """Yield each conf file in the appliance"""
     yield from iglob(join(root, "conf.d/*"))
 
 
 def iter_plan(root: str) -> Iterator[str]:
-    """yield each plan file in the appliance"""
+    """Yield each plan file in the appliance"""
     yield from iglob(join(root, "plan/*"))
 
 
 def iter_overlay(root: str) -> Iterator[str]:
-    """yield each file in the appliance overlay"""
+    """Yield each file in the appliance overlay"""
     yield from iglob(join(root, "overlay/**"), recursive=True)

@@ -21,7 +21,8 @@
 def position_from_char_offset(
     path: str, offset: int
 ) -> tuple[int, int] | None:
-    """Get column/line from offset into file
+    """
+    Get column/line from offset into file
 
     Given an offset into a file, returns the line and column numbers
     respectively, expressed as a tuple. If offset is invalid (such as too
@@ -45,7 +46,8 @@ def position_from_char_offset(
 def position_from_byte_offset(
     path: str, offset: int
 ) -> tuple[int, int] | None:
-    """Get column/line from offset into file in binary mode
+    """
+    Get column/line from offset into file in binary mode
 
     Given an offset into a file (in binary mode), returns the line and column
     numbers respectively, expressed as a tuple. If offset is invalid (such as

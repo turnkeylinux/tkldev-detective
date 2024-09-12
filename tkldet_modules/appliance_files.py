@@ -16,12 +16,13 @@
 # tkldev-detective. If not, see <https://www.gnu.org/licenses/>.
 """Classifiers for appliance specific files"""
 
+from typing import ClassVar
+
 from libtkldet.classifier import (
     ExactPathClassifier,
     SubdirClassifier,
     register_classifier,
 )
-from typing import ClassVar
 
 
 @register_classifier

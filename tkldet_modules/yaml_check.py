@@ -20,10 +20,10 @@ except ImportError:
     YAML = False
 else:
     YAML = True
-from typing import Generator
+from collections.abc import Generator
 
-from libtkldet.linter import FileLinter, FileItem, register_linter
-from libtkldet.report import Report, FileReport, ReportLevel
+from libtkldet.linter import FileItem, FileLinter, register_linter
+from libtkldet.report import FileReport, Report, ReportLevel
 
 
 class YamlLinter(FileLinter):

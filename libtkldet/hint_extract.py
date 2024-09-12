@@ -127,7 +127,8 @@ def format_extract(
     row_span: tuple[int, int] | int,
     col_span: tuple[int, int] | int | None,
 ) -> list[str]:
-    """Annotate segment of file
+    """
+    Annotate segment of file
 
     Given a row or span of rows and optionally a column or span of columns
     return an annotated segment of the specified file

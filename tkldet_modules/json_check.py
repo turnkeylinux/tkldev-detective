@@ -18,10 +18,11 @@
 """Json related linters"""
 
 import json
-from typing import Generator, ClassVar
+from collections.abc import Generator
+from typing import ClassVar
 
-from libtkldet.linter import FileLinter, FileItem, register_linter
-from libtkldet.report import Report, FileReport, ReportLevel
+from libtkldet.linter import FileItem, FileLinter, register_linter
+from libtkldet.report import FileReport, Report, ReportLevel
 
 
 @register_linter

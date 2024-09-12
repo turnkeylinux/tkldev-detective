@@ -17,11 +17,12 @@
 
 """Linters for appliance makefile"""
 
-from typing import Generator, ClassVar
+from collections.abc import Generator
+from typing import ClassVar
 
-from libtkldet.linter import FileLinter, register_linter, FileItem
-from libtkldet.report import Report, FileReport, ReportLevel
 from libtkldet.fuzzy import fuzzy_suggest
+from libtkldet.linter import FileItem, FileLinter, register_linter
+from libtkldet.report import FileReport, Report, ReportLevel
 
 
 @register_linter
@@ -65,11 +66,15 @@ class ApplianceMakefileLinter(FileLinter):
                     if var not in mk_confvars:
                         suggested_var = fuzzy_suggest(var, mk_confvars)
                         if suggested_var:
-                            fix = f"did you mean {suggested_var!r} instead of {var!r} ?"
+                            fix = (
+                                f"did you mean {suggested_var!r}"
+                                f" instead of {var!r} ?"
+                            )
                         else:
                             fix = (
-                                f"either replace with one of {mk_confvars} or add it to"
-                                " turnkey.mk's list of valid CONF_VARS",
+                                f"either replace with one of {mk_confvars}"
+                                " or add it to turnkey.mk's list of valid"
+                                " CONF_VARS"
                             )
                         yield FileReport(
                             item=item,

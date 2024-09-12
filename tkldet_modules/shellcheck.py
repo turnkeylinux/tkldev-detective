@@ -15,17 +15,17 @@
 # You should have received a copy of the GNU General Public License along with
 # tkldev-detective. If not, see <https://www.gnu.org/licenses/>.
 import json
-from typing import Generator
 import subprocess
+from collections.abc import Generator
 
-from libtkldet.linter import FileLinter, FileItem, register_linter
-from libtkldet.report import (
-    Report,
-    FileReport,
-    parse_report_level,
-    Replacement,
-)
 from libtkldet.apt_file import is_installed
+from libtkldet.linter import FileItem, FileLinter, register_linter
+from libtkldet.report import (
+    FileReport,
+    Replacement,
+    Report,
+    parse_report_level,
+)
 
 if is_installed("shellcheck"):
 

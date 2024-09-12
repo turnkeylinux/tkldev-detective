@@ -15,15 +15,17 @@
 # You should have received a copy of the GNU General Public License along with
 # tkldev-detective. If not, see <https://www.gnu.org/licenses/>.
 
-from typing import Iterator
-from os.path import relpath, abspath
-from . import locator, common_data, classifier
+from collections.abc import Iterator
+from os.path import abspath, relpath
+
+from . import classifier, common_data, locator
 from .common_data import APPLIANCE_ROOT
 from .error import ApplianceNotFoundError
 
 
 def initialize(path: str, ignore_non_appliance: bool) -> None:
-    """Initialize everything
+    """
+    Initialize everything
 
     Involves scraping makefiles, parsing plans, etc.
     """

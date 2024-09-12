@@ -16,10 +16,11 @@
 # tkldev-detective. If not, see <https://www.gnu.org/licenses/>.
 """General file classification"""
 
-from libtkldet.classifier import FileClassifier, FileItem, register_classifier
-from os.path import splitext, isfile
-from typing import ClassVar
 from logging import getLogger
+from os.path import isfile, splitext
+from typing import ClassVar
+
+from libtkldet.classifier import FileClassifier, FileItem, register_classifier
 
 logger = getLogger(__name__)
 

@@ -21,14 +21,16 @@ Encapsulates "Linter"s
 code here provides interface for modules to provide linting
 """
 
-from typing import ClassVar, Iterator
+from collections.abc import Iterator
+from typing import ClassVar
 
-from .classifier import Item, FileItem
+from .classifier import FileItem, Item
 from .report import Report
 
 
 class Linter:
-    """Base class for linters
+    """
+    Base class for linters
 
     by default linters automatically enable/disable based on `ENABLE_TAGS` and
     `DISABLE_TAGS`
@@ -44,13 +46,14 @@ class Linter:
     ItemType: ClassVar[type[Item]] = Item
 
     def should_check(self, item: Item) -> bool:
-        """Actually performs check to see if the linter should run on this item
+        """
+        Actually performs check to see if the linter should run on this item
 
-        if `ENABLE_TAGS` is empty, run lint on all items except those that have
-        tags in `DISABLE_TAGS`
+        if `ENABLE_TAGS` is empty, run lint on all items except those
+        that have tags in `DISABLE_TAGS`
 
-        if `ENABLE_TAGS` has tags, run lint only on items which have at least 1 tag
-        from `ENABLE_TAGS` and non from `DISABLE_TAGS`
+        if `ENABLE_TAGS` has tags, run lint only on items which have at least
+        1 tag from `ENABLE_TAGS` and non from `DISABLE_TAGS`
 
         (safe to override)
         """
@@ -96,7 +99,8 @@ _LINTERS: list[type[Linter]] = []
 
 
 def register_linter(linter: type[Linter]) -> type[Linter]:
-    """Register a linter
+    """
+    Register a linter
 
     Must be called on all linters added
     """

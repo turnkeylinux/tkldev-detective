@@ -22,7 +22,8 @@ MAX_DIFF = 3
 
 
 def fuzzy_diff(x: str, y: str) -> int:
-    """Calculate difference between two strings
+    """
+    Calculate difference between two strings
 
     Return value has no objective meaning, only for comparison
     """
@@ -38,7 +39,8 @@ def fuzzy_diff(x: str, y: str) -> int:
 def fuzzy_suggest(
     check: str, options: list[str], max_diff: int = MAX_DIFF
 ) -> str | None:
-    """Suggest a string from given options
+    """
+    Suggest a string from given options
 
     Given a 'check' value, and a list of valid options, find the option
     closest to the 'check' value, given that it's 'difference' (calculated by

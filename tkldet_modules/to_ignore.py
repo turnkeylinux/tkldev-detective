@@ -16,9 +16,10 @@
 # tkldev-detective. If not, see <https://www.gnu.org/licenses/>.
 """For marking files which should be ignored"""
 
-from libtkldet.classifier import FileClassifier, FileItem, register_classifier
 import os.path
 from typing import ClassVar
+
+from libtkldet.classifier import FileClassifier, FileItem, register_classifier
 
 
 def is_or_has_ancestor_dir(path: str, directory: str) -> bool:

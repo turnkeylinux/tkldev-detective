@@ -1,13 +1,14 @@
+#!/usr/bin/env python3
+
 """
-This file creates a ruff.toml file using the configuration found inside
-tkldet_modules/ruff.py
+Create a ruff config file from tkldet_modules/ruff.py
 
 Mostly to be used with ruff's formatter
 """
 
 import json
-from os.path import abspath, dirname, join
 import sys
+from os.path import abspath, dirname, join
 
 PROJECT_PATH = dirname(dirname(abspath(__file__)))
 TKLDET_MODULE_PATH = join(PROJECT_PATH, "tkldet_modules")
@@ -15,8 +16,6 @@ TKLDET_MODULE_PATH = join(PROJECT_PATH, "tkldet_modules")
 sys.path.insert(0, PROJECT_PATH)
 sys.path.insert(1, TKLDET_MODULE_PATH)
 
-import libtkldet
-from libtkldet.report import ReportLevel
 from ruff import RUFF_LINTS
 
 # these rules cause issues with the formatter
@@ -35,7 +34,7 @@ target-version = "py311"
 select = []
 ignore = [*incompatible]
 
-for group, lints in RUFF_LINTS.items():
+for lints in RUFF_LINTS.values():
     for lint, level in lints.items():
         if level is not None and lint not in incompatible:
             select.append(lint)

@@ -18,15 +18,15 @@
 # disable line-length warnings, fixing them makes this file
 # too difficult to read
 
-# ruff: noqa: E501
+# ruff: noqa: E501, C408
 
 import json
-from typing import Generator
 import subprocess
+from collections.abc import Generator
 
-from libtkldet.linter import FileLinter, FileItem, register_linter
-from libtkldet.report import Report, FileReport, parse_report_level
 from libtkldet.apt_file import is_in_path
+from libtkldet.linter import FileItem, FileLinter, register_linter
+from libtkldet.report import FileReport, Report, parse_report_level
 
 RUFF_LINTS = dict(
     pyflakes=dict(

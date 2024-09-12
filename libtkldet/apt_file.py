@@ -15,7 +15,8 @@
 # You should have received a copy of the GNU General Public License along with
 # tkldev-detective. If not, see <https://www.gnu.org/licenses/>.
 
-"""Utilities for finding packages
+"""
+Utilities for finding packages
 
 Finds packages based on files they provide, including those not
 installed
@@ -74,7 +75,8 @@ def find_python_package(package_name: str) -> list[str]:
 
 
 def find_python_package_from_import(module_str: str) -> list[str]:
-    """Find python package from import name
+    """
+    Find python package from import name
 
     Return a list of packages that provide a given python import module, may
     be several modules deep (e.g. `foo.bar.baz`), attempts to find most

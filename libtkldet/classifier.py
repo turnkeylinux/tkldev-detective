@@ -21,14 +21,16 @@ Encapsulates "Classifier"s & the "Item"s they operate on
 code here provides ability to "classify" different files
 """
 
+from collections.abc import Iterable, Iterator
 from dataclasses import dataclass
-from typing import Iterator, Iterable, Iterator, cast, ClassVar
 from os.path import dirname
+from typing import ClassVar, cast
 
 
 @dataclass(frozen=True)
 class Item:
-    """Some "thing" which can be classified
+    """
+    Some "thing" which can be classified
 
     tags are used to classify items,
     value is dependant on type of "thing"
@@ -80,7 +82,8 @@ class Item:
 
 @dataclass(frozen=True)
 class FileItem(Item):
-    """Specifically files which can be classified
+    """
+    Specifically files which can be classified
 
     value is the raw path found by the locator
     """
@@ -98,7 +101,8 @@ class FileItem(Item):
 
 @dataclass(frozen=True)
 class PackageItem(Item):
-    """Specifically packages installed via plan which can be classied
+    """
+    Specifically packages installed via plan which can be classied
 
     value is the package name
     """
@@ -112,9 +116,11 @@ class PackageItem(Item):
 
 
 class Classifier:
-    """Classifier base class
+    """
+    Classifier base class
 
-    all registered classifiers are called with each item yielded by the locator.
+    All registered classifiers are called with each item yielded by the
+    locator.
 
     the tags determined by the classifiers determine which linters are run on
     which files.
@@ -128,7 +134,8 @@ class Classifier:
     ItemType: ClassVar[type[Item]] = Item
 
     def do_classify(self, item: Item) -> None:
-        """Perform classification
+        """
+        Perform classification
 
         Perform a classification so long as the concrete item type
         is compatible with this classifier
@@ -178,7 +185,8 @@ class SubdirClassifier(FileClassifier):
     "the parent directory"
 
     recursive: ClassVar[bool]
-    "whether to match a child of any depth or only files directly inside the given dir"
+    """whether to match a child of any depth or only files directly inside
+    the given dir"""
 
     tags: ClassVar[list[str]]
     "exact tags to add to matched item"
@@ -200,7 +208,8 @@ _CLASSIFIERS: list[type[Classifier]] = []
 
 
 def register_classifier(classifier: type[Classifier]) -> type[Classifier]:
-    """Register a classifier
+    """
+    Register a classifier
 
     This must be called on classifiers added
     """

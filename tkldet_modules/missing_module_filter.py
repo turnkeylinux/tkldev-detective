@@ -15,17 +15,17 @@
 # You should have received a copy of the GNU General Public License along with
 # tkldev-detective. If not, see <https://www.gnu.org/licenses/>.
 
-from typing import Generator
+import re
+from collections.abc import Generator
+from os.path import dirname
 
-from libtkldet.report import Report, ReportLevel, register_filter, ReportFilter
-from libtkldet.linter import FileItem
 from libtkldet.apt_file import find_python_package_from_import
 from libtkldet.common_data import (
-    is_package_to_be_installed,
     get_path_in_common_overlay,
+    is_package_to_be_installed,
 )
-from os.path import dirname
-import re
+from libtkldet.linter import FileItem
+from libtkldet.report import Report, ReportFilter, ReportLevel, register_filter
 
 MISSING_MODULE_RE = re.compile(r"^Unable to import '(.*)'$")
 
@@ -58,7 +58,10 @@ def filter_packaged(report: Report, module_name: str) -> Report | None:
         if not package_installed:
             if len(packages) > 1:
                 packages_str = ", ".join('"' + pkg + '"' for pkg in packages)
-                modified_message += f" (perhaps you meant to add one of {packages_str} to the plan?)"
+                modified_message += (
+                    " (perhaps you meant to add one of"
+                    f" {packages_str} to the plan?)"
+                )
             else:
                 modified_message += (
                     f' (perhaps you meant to add "{packages[0]}" to the plan?)'

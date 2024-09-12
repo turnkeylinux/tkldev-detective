@@ -82,7 +82,8 @@ BOLD: str
 
 
 def set_colors_enabled(enabled: bool) -> None:
-    """Set color globals to ANSI color codes
+    """
+    Set color globals to ANSI color codes
 
     If not enabled,  sets them to empty strings
     """

@@ -15,13 +15,14 @@
 # You should have received a copy of the GNU General Public License along with
 # tkldev-detective. If not, see <https://www.gnu.org/licenses/>.
 import json
-from typing import Generator, ClassVar
 import subprocess
-from os.path import join, dirname, abspath
+from collections.abc import Generator
+from os.path import abspath, dirname, join
+from typing import ClassVar
 
-from libtkldet.linter import FileLinter, FileItem, register_linter
-from libtkldet.report import Report, FileReport, parse_report_level
-from libtkldet.apt_file import is_installed, is_in_path
+from libtkldet.apt_file import is_in_path, is_installed
+from libtkldet.linter import FileItem, FileLinter, register_linter
+from libtkldet.report import FileReport, Report, parse_report_level
 
 if is_installed("pylint") and not is_in_path("ruff"):
     rcfile = join(dirname(dirname(abspath(__file__))), "pylint_rcfile")

@@ -19,9 +19,9 @@
 
 import importlib.machinery
 import importlib.util
-from os.path import join, dirname, abspath, splitext, isfile, exists
-from os import listdir
 import sys
+from os import listdir
+from os.path import abspath, dirname, exists, isfile, join, splitext
 
 from . import colors as co
 from .error import TKLDevDetectiveError

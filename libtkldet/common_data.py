@@ -17,12 +17,13 @@
 """Utilities and data relating to ${FAB_PATH}/common"""
 
 import os
-from os.path import join, isfile
-from typing import Iterator
-from .plan_resolve import parse_plan, PlanEntry
-from .locator import iter_plan
+from collections.abc import Iterator
+from os.path import isfile, join
+
 from .classifier import PackageItem
-from .mkparser import parse_makefile, CommonFabBuildData
+from .locator import iter_plan
+from .mkparser import CommonFabBuildData, parse_makefile
+from .plan_resolve import PlanEntry, parse_plan
 
 APPLIANCE_ROOT: str = ""
 _PLAN_RESOLVE_CACHE: list[PlanEntry] = []
@@ -69,27 +70,28 @@ def iter_packages() -> Iterator[PackageItem]:
 
 
 def get_common_overlays() -> list[str]:
-    """Return a list of all common overlays included in this appliance"""
+    """Return a list of all common overlays in this appliance"""
     return _FAB_DATA.overlays[:]
 
 
 def get_common_conf() -> list[str]:
-    """Return a list of all common conf scripts included in this appliance"""
+    """Return a list of all common conf scripts in this appliance"""
     return _FAB_DATA.conf[:]
 
 
 def get_common_removelists() -> list[str]:
-    """Return a list of all common removelists included in this appliance"""
+    """Return a list of all common removelists in this appliance"""
     return _FAB_DATA.removelists[:]
 
 
 def get_common_removelists_final() -> list[str]:
-    """Return a list of all common final removelists included in this appliance"""
+    """Return a list of all common final removelists in this appliance"""
     return _FAB_DATA.removelists_final[:]
 
 
 def get_path_in_common_overlay(path: str) -> str | None:
-    """Get overlay path from absolute path
+    """
+    Get overlay path from absolute path
 
     Check if a given path (expressed as an absolute path, where it would be
     placed in a build) is included in build, if so the path to the file/dir IN

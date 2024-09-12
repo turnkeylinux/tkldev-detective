@@ -17,12 +17,13 @@
 
 """very naive cpp parser for plan parsing"""
 
-from os.path import join, isfile
 from dataclasses import dataclass
+from os.path import isfile, join
+
 from .error import (
+    InvalidPlanError,
     PlanNotFoundError,
     UnknownPlanDirectiveError,
-    InvalidPlanError,
 )
 
 static_vars = {"KERNEL": "", "DEBIAN": "", "AMD64": ""}
@@ -102,7 +103,8 @@ def _remove_multiline_comments(raw: str) -> str:
 def _parse_plan(  # noqa: C901, PLR0912
     path: str, include_paths: list[str], plan_stack: list[str] | None = None
 ) -> list[PlanEntry]:
-    """Parse a plan
+    """
+    Parse a plan
 
     (uses cpp, but notably does not use *most* cpp functionality).
     This code will not work on *most* cpp related projects

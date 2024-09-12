@@ -15,7 +15,8 @@
 # You should have received a copy of the GNU General Public License along with
 # tkldev-detective. If not, see <https://www.gnu.org/licenses/>.
 
-"""Utilities for parsing and extracting information from makefiles
+"""
+Utilities for parsing and extracting information from makefiles
 
 Extracts variable definitions from makefiles, purpose built for
 fab tool-chain on tkldev, so ignores tests & definitions, butchers most
@@ -24,9 +25,9 @@ probably produces a lot of other erroneous output (if used for general
 makefile parsing)
 """
 
+import os
 import typing
 from dataclasses import dataclass
-import os
 
 ASSIGNMENT_OPERATORS = ["?=", ":=", "+=", "="]
 CHECKS = ["ifeq", "ifneq", "ifdef", "ifndef"]
@@ -58,7 +59,8 @@ def split_value(raw: str) -> list[str]:
 
 
 def parse_assignment(line: str) -> tuple[str, str, str] | None:
-    """Parse assignment line
+    """
+    Parse assignment line
 
     Attempt to parse a makefile assignment operation,
     if successful return tuple of (variable_name, operator, variable_value)
@@ -100,7 +102,8 @@ class MutMakefileData:
     included: list[str]
 
     def resolve_var(self, value: str) -> ValueList:
-        """Expand variables
+        """
+        Expand variables
 
         Expands makefile and env variables, then split into multiple values
         """
@@ -143,7 +146,8 @@ class MutMakefileData:
             raise ValueError(error_message)
 
     def finish(self) -> "MakefileData":
-        """Return concrete class
+        """
+        Return concrete class
 
         Resolve unresolved variables and return a concrete version of this
         class with simpler typing
@@ -202,7 +206,8 @@ class MakefileData(MutMakefileData):
         return self.variables[key]
 
     def to_fab_data(self) -> CommonFabBuildData:
-        """Return high level appliance data
+        """
+        Return high level appliance data
 
         Returns included overlays, conf and removelists
         """
@@ -223,7 +228,8 @@ class MakefileData(MutMakefileData):
 def parse_makefile(  # noqa: C901, PLR0912
     path: str, makefile_data: MakefileData | None = None
 ) -> MakefileData:
-    """Get all variables in makefile including included makefiles
+    """
+    Get all variables in makefile including included makefiles
 
     Attempts to naively get all variables defined in makefile tree. This
     function is recursive and makefile_data is used when including other

@@ -22,14 +22,16 @@ class TKLDevDetectiveError(Exception):
 
 
 class ApplianceNotFoundError(TKLDevDetectiveError):
-    """Appliance was not found
+    """
+    Appliance was not found
 
     Likely path/app name was incorrect
     """
 
 
 class PlanNotFoundError(TKLDevDetectiveError):
-    """A plan could not be included
+    """
+    A plan could not be included
 
     Likely include name is incorrect
     """
@@ -40,7 +42,8 @@ class UnknownPlanDirectiveError(TKLDevDetectiveError):
 
 
 class InvalidPlanError(TKLDevDetectiveError):
-    """Plan appears to not be valid
+    """
+    Plan appears to not be valid
 
     Mismatched #if* and #endif directives likely
     """

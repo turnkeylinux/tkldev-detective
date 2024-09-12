@@ -15,25 +15,28 @@
 # You should have received a copy of the GNU General Public License along with
 # tkldev-detective. If not, see <https://www.gnu.org/licenses/>.
 
-"""Encapsulates "reports"
+"""
+Encapsulates "reports"
 
 these are issues, warnings or notes about "Item"s produced by "Linter"s
 """
 
+import enum
+import textwrap
+from collections.abc import Iterable, Iterator
 from dataclasses import dataclass
 from enum import Enum
-import enum
-from typing import Iterator, Iterable, ClassVar
-import textwrap
+from typing import ClassVar
 
-from .classifier import Item, FileItem
 from . import colors as co
+from .classifier import FileItem, Item
 from .hint_extract import format_extract
 
 
 @dataclass
 class Replacement:
-    """Holds replacement data
+    """
+    Holds replacement data
 
     a list of replacements in form provided by linters
     """
@@ -103,7 +106,8 @@ def parse_report_level(raw: str) -> ReportLevel:
 
 @dataclass(frozen=True)
 class Report:
-    """Information to be presented to user
+    """
+    Information to be presented to user
 
     Holds all information about a particular issue in a particular location
     possibly including metadata, possible fixes, severity, which linter
@@ -156,7 +160,8 @@ class Report:
         }
 
     def modified(self, **kwargs: Item | str | dict | None) -> "Report":
-        """Return new modified version of this report
+        """
+        Return new modified version of this report
 
         Return a copy of this report with fields specified in `kwargs`
         replacing fields from this report
@@ -184,7 +189,8 @@ class Report:
 
 @dataclass(frozen=True)
 class FileReport(Report):
-    """Holds information about a report for a file
+    """
+    Holds information about a report for a file
 
     Holds all information about a particular issue in a particular location
     in a particular file possibly including metadata, possible fixes,
@@ -246,7 +252,8 @@ class FileReport(Report):
 
 
 class ReportFilter:
-    """A filter to change reports before presenting
+    """
+    A filter to change reports before presenting
 
     Last stop before presenting to the user, report filters can modify,
     split, generate or even remove reports
@@ -255,7 +262,8 @@ class ReportFilter:
     WEIGHT: ClassVar[int] = 100
 
     def filter(self, report: Report) -> Iterator[Report]:
-        """Given a report filter or modify it
+        """
+        Given a report filter or modify it
 
         There doesn't need to be a 1-1 relationship between inputs and outputs
 
@@ -270,7 +278,8 @@ _FILTERS: list[type[ReportFilter]] = []
 
 
 def register_filter(filt: type[ReportFilter]) -> type[ReportFilter]:
-    """Register a report filter
+    """
+    Register a report filter
 
     Must be called on all filters added
     """
