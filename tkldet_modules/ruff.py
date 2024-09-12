@@ -14,6 +14,12 @@
 #
 # You should have received a copy of the GNU General Public License along with
 # tkldev-detective. If not, see <https://www.gnu.org/licenses/>.
+
+# disable line-length warnings, fixing them makes this file
+# too difficult to read
+
+# ruff: noqa: E501
+
 import json
 from typing import Generator
 import subprocess
