@@ -43,7 +43,7 @@ def yield_appliance_items() -> Iterator[classifier.Item]:
     """Yield everything 'lintable'"""
 
     yield from common_data.iter_packages()
-    for path in locator.locator(APPLIANCE_ROOT):
+    for path in locator.locator(APPLIANCE_ROOT, False):
         yield classifier.FileItem(
             value=path,
             _tags={},
