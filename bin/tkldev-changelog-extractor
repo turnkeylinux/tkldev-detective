@@ -18,7 +18,7 @@ logging.basicConfig(level=log_level,
                     format='%(asctime)s %(name)-4s %(levelname)-5s %(message)s',
                     datefmt='%H:%M:%S',
                     )
-logger = logging.getLogger()
+logger = logging.getLogger("tkldev-detective.changelog-extractor")
 
 def error(msg):
     print('ERROR: ' + msg, file=sys.stderr)
