@@ -17,10 +17,14 @@
 
 """very naive cpp parser for plan parsing"""
 
-from os.path import join, isfile
 from dataclasses import dataclass
-from typing import Optional
-from .error import PlanNotFound, UnknownPlanDirective, InvalidPlan
+from os.path import isfile, join
+
+from .error import (
+    InvalidPlanError,
+    PlanNotFoundError,
+    UnknownPlanDirectiveError,
+)
 
 static_vars = {"KERNEL": "", "DEBIAN": "", "AMD64": ""}
 
@@ -45,7 +49,7 @@ class PlanEntry:
     """
 
     def get_plan_path(self) -> str:
-        """path to plan file which contains this package"""
+        """Path to plan file which contains this package"""
         return self.include_stack[-1]
 
 
@@ -55,13 +59,11 @@ def _include_plan(
     for path in include_paths:
         if isfile(join(path, name)):
             return _parse_plan(join(path, name), include_paths, plan_stack)
-    raise PlanNotFound(name)
+    raise PlanNotFoundError(name)
 
 
 def _remove_multiline_comments(raw: str) -> str:
-    """
-    removes multiline cpp comments (in the form /* I'm a comment */)
-    """
+    """Remove multiline cpp comments (in the form /* I'm a comment */)"""
 
     out = ""
     comment_depth = 0
@@ -76,28 +78,37 @@ def _remove_multiline_comments(raw: str) -> str:
             elif char == "*":
                 comment_begun = True
 
-        else:
-            if comment_begun:
-                if char == "*":
-                    comment_depth += 1
-                else:
-                    out += "/" + char
-                comment_begun = False
-            elif char == "/":
-                comment_begun = True
+        elif comment_begun:
+            if char == "*":
+                comment_depth += 1
             else:
-                out += char
+                out += "/" + char
+            comment_begun = False
+        elif char == "/":
+            comment_begun = True
+        else:
+            out += char
 
     return out
 
 
-def _parse_plan(
-    path: str, include_paths: list[str], plan_stack: Optional[list[str]] = None
-) -> list[PlanEntry]:
-    """Parse a plan (uses cpp, but notably does not use *most* cpp
-    functionality).
+# ignoring lints in this function:
+# - C901 (too complex), breaking this down further
+#       would obfuscate what it does
+# - PLW0912 (too many branches), as above
+# - PLW2901 (iteration variable overwritten), variable's meaning does not
+#       change with overwrite.
 
-    This code will not work on *most* cpp related projects"""
+
+def _parse_plan(  # noqa: C901, PLR0912
+    path: str, include_paths: list[str], plan_stack: list[str] | None = None
+) -> list[PlanEntry]:
+    """
+    Parse a plan
+
+    (uses cpp, but notably does not use *most* cpp functionality).
+    This code will not work on *most* cpp related projects
+    """
 
     if plan_stack is None:
         plan_stack = [path]
@@ -122,22 +133,23 @@ def _parse_plan(
     for line in data.splitlines():
         # remove single line comment
         if "//" in line:
-            line = line.split("//", 1)[0]
+            line = line.split("//", 1)[0]  # noqa: PLW2901
         # honestly would've thought hashes in cpp code wouldn't work like this,
         # but apparently it does
         if not line.startswith("#") and "#" in line:
-            line = line.split("#", 1)[0]
+            line = line.split("#", 1)[0]  # noqa: PLW2901
 
-        line = line.strip()
+        line = line.strip()  # noqa: PLW2901
 
         if not line:
             continue
 
         if line.startswith("#endif"):
             if not cond_stack:
-                raise InvalidPlan(
+                error_message = (
                     f"unbalanced #if* and #endif directives in plan {path}"
                 )
+                raise InvalidPlanError(error_message)
             cond_stack.pop()
             continue
 
@@ -156,11 +168,13 @@ def _parse_plan(
             elif line.startswith("#include"):
                 packages.extend(
                     _include_plan(
-                        line[8:].strip().strip("<>"), include_paths, plan_stack[:]
+                        line[8:].strip().strip("<>"),
+                        include_paths,
+                        plan_stack[:],
                     )
                 )
             elif line.startswith("#"):
-                raise UnknownPlanDirective(line)
+                raise UnknownPlanDirectiveError(line)
             else:
                 assert "=" not in line, "assumption broken: '=' in plan"
                 packages.append(PlanEntry(line.strip(), plan_stack[:]))
@@ -174,5 +188,5 @@ def _parse_plan(
 
 
 def parse_plan(path: str) -> list[PlanEntry]:
-    """parse a plan and return a plan entry for each package """
+    """Parse a plan and return a plan entry for each package"""
     return _parse_plan(path, ["/turnkey/fab/common/plans"])

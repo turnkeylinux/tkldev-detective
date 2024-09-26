@@ -17,43 +17,51 @@
 
 """locates files to be classified and eventually linted"""
 
-from os.path import join, normpath, basename, isdir, isfile
+from collections.abc import Iterator
 from glob import iglob
+from logging import getLogger
+from os.path import basename, isdir, isfile, join, normpath
 
-from typing import Generator, Optional
-
-from .error import ApplianceNotFound
+from .error import ApplianceNotFoundError
 
 PRODUCTS_DIR = "/turnkey/fab/products"
 
+logger = getLogger(__name__)
 
-def is_appliance_path(path: str):
-    """ is path, a path to an appliance? """
+
+def is_appliance_path(path: str) -> bool:
+    """Is path, a path to an appliance?"""
     path = normpath(path)
     if path == join(PRODUCTS_DIR, basename(path)):
         return isfile(join(path, "Makefile"))
     return False
 
 
-def is_appliance_name(name: str):
-    """ is name, the name of an existing appliance on tkldev? """
-    return "/" not in name and isdir(join(PRODUCTS_DIR, name))
+def is_appliance_name(name: str) -> bool:
+    """Is name, the name of an existing appliance on tkldev?"""
+    return name != "." and "/" not in name and isdir(join(PRODUCTS_DIR, name))
 
 
-def is_inside_appliance(path: str):
-    """ is path, a path to a file inside an appliance """
+def is_inside_appliance(path: str) -> bool:
+    """Is path, a path to a file inside an appliance"""
     path = normpath(path)
     if not path.startswith(PRODUCTS_DIR + "/"):
         return False
     path = path[len(PRODUCTS_DIR) + 1 :]
-    return bool(path)  # if path is non-zero length, it must be a path into an appliance
+    return bool(
+        path
+    )  # if path is non-zero length, it must be a path into an appliance
 
 
 def get_appliance_root(path: str) -> str:
-    """Given a path to appliance, file inside appliance or appliance name,
-    return absolute path to the appliance"""
+    """
+    Get appliance root from path
 
-    root: Optional[str] = None
+    Given a path to appliance, file inside appliance or appliance name,
+    return absolute path to the appliance
+    """
+
+    root: str | None = None
 
     if is_appliance_name(path):
         root = join(PRODUCTS_DIR, path)
@@ -65,49 +73,73 @@ def get_appliance_root(path: str) -> str:
         root = join(PRODUCTS_DIR, appliance_name)
 
     if root is None or not isfile(join(root, "Makefile")):
-        raise ApplianceNotFound(
-            "input does not appear to be an appliance name, path to an appliance"
-            " or path to a file inside of an appliance"
-        )
-    return root
-
-
-def locator(root: str) -> Generator[str, None, None]:
-    """yields (pretty much) every file in an appliance of potential concern
-    or a specific file only if given a path to a file inside an appliance"""
-    if is_appliance_name(root):
-        yield from full_appliance_locator(join(PRODUCTS_DIR, root))
-    elif is_appliance_path(root):
-        yield from full_appliance_locator(root)
-    elif is_inside_appliance(root):
-        yield root
-    else:
-        raise ApplianceNotFound(
+        logger.info("lint root is not an appliance")
+        error_message = (
             "input does not appear to be an appliance name, path to an"
             " appliance or path to a file inside of an appliance"
         )
+        raise ApplianceNotFoundError(error_message)
+    return root
 
 
-def full_appliance_locator(root: str) -> Generator[str, None, None]:
-    """yields (pretty much) every file in an appliance of potential concern"""
-    yield from map(
-        lambda x: join(root, x), ["Makefile", "changelog", "README.rst", "removelist"]
+def locator(root: str, ignore_non_appliance: bool) -> Iterator[str]:
+    """
+    Yield most files inside appliance
+
+    Yields almost every file in an appliance of potential concern
+    or a specific file only if given a path to a file inside an appliance
+    """
+    if is_appliance_name(root):
+        logger.debug("locator(_) # is appliance name")
+        yield from full_appliance_locator(join(PRODUCTS_DIR, root))
+    elif is_appliance_path(root):
+        logger.debug("locator(_) # is appliance path")
+        yield from full_appliance_locator(root)
+    elif is_inside_appliance(root):
+        logger.debug("locator(_) # is inside appliance")
+        yield from full_appliance_locator(get_appliance_root(root))
+    elif ignore_non_appliance:
+        logger.debug(
+            "locator(_) # is not an appliance (but ignore_non_appliance set)"
+        )
+        yield from everything_locator(root)
+    else:
+        error_message = (
+            "input does not appear to be an appliance name, path to an"
+            " appliance or path to a file inside of an appliance"
+        )
+        raise ApplianceNotFoundError(error_message)
+
+
+def everything_locator(root: str) -> Iterator[str]:
+    """Yield everything, appliance or not"""
+    if isfile(root):
+        yield root
+    else:
+        yield from iglob(join(root, "**"), recursive=True, include_hidden=True)
+
+
+def full_appliance_locator(root: str) -> Iterator[str]:
+    """Yield (pretty much) every file in an appliance of potential concern"""
+    yield from (
+        join(root, x)
+        for x in ["Makefile", "changelog", "README.rst", "removelist"]
     )
     yield from iter_conf(root)
     yield from iter_plan(root)
     yield from iter_overlay(root)
 
 
-def iter_conf(root: str) -> Generator[str, None, None]:
-    """ yield each conf file in the appliance """
+def iter_conf(root: str) -> Iterator[str]:
+    """Yield each conf file in the appliance"""
     yield from iglob(join(root, "conf.d/*"))
 
 
-def iter_plan(root: str) -> Generator[str, None, None]:
-    """ yield each plan file in the appliance """
+def iter_plan(root: str) -> Iterator[str]:
+    """Yield each plan file in the appliance"""
     yield from iglob(join(root, "plan/*"))
 
 
-def iter_overlay(root: str) -> Generator[str, None, None]:
-    """ yield each file in the appliance overlay"""
+def iter_overlay(root: str) -> Iterator[str]:
+    """Yield each file in the appliance overlay"""
     yield from iglob(join(root, "overlay/**"), recursive=True)

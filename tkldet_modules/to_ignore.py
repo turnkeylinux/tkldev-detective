@@ -14,25 +14,31 @@
 #
 # You should have received a copy of the GNU General Public License along with
 # tkldev-detective. If not, see <https://www.gnu.org/licenses/>.
+"""For marking files which should be ignored"""
+
+import os.path
+from typing import ClassVar
+
 from libtkldet.classifier import FileClassifier, FileItem, register_classifier
-from os.path import isfile
+
+
+def is_or_has_ancestor_dir(path: str, directory: str) -> bool:
+    """Checks if path has an ancestor directory with a given name"""
+    while path not in ("/", ""):
+        path, path_segment = os.path.split(path)
+        if path_segment == directory:
+            return True
+    return False
 
 
 @register_classifier
-class ShebangClassifier(FileClassifier):
-    WEIGHT = 10
+class FiletypeClassifier(FileClassifier):
+    """Classify files by a parent directory"""
 
-    def classify(self, item: FileItem):
-        if isfile(item.abspath):
-            with open(item.abspath, "rb") as fob:
-                shebang = b""
-                head = fob.read(512)
+    WEIGHT: ClassVar[int] = 5
 
-                if b"\n" in head:
-                    shebang = head.split(b"\n")[0].strip()
-                    if shebang:
-                        shebang = shebang.split()[0].strip()
-            shebang = str(shebang)
-
-            if shebang.startswith("#!"):
-                item.add_tags(self, [f"shebang:{shebang[2:]}"])
+    def classify(self, item: FileItem) -> None:
+        if is_or_has_ancestor_dir(item.abspath, "__pycache__"):
+            item.add_tags(self, ["ignore:__pycache__"])
+        if is_or_has_ancestor_dir(item.abspath, ".git"):
+            item.add_tags(self, ["ignore:.git"])

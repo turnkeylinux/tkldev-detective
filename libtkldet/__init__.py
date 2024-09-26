@@ -15,23 +15,35 @@
 # You should have received a copy of the GNU General Public License along with
 # tkldev-detective. If not, see <https://www.gnu.org/licenses/>.
 
-from typing import Generator
-from os.path import relpath, abspath
-from . import locator, common_data, classifier
+from collections.abc import Iterator
+from os.path import abspath, relpath
+
+from . import classifier, common_data, locator
 from .common_data import APPLIANCE_ROOT
+from .error import ApplianceNotFoundError
 
 
-def initialize(path: str):
-    """initialize everything, involves scraping makefiles, parsing plans, etc."""
-    root = locator.get_appliance_root(path)
-    common_data.initialize_common_data(root)
+def initialize(path: str, ignore_non_appliance: bool) -> None:
+    """
+    Initialize everything
+
+    Involves scraping makefiles, parsing plans, etc.
+    """
+    try:
+        root = locator.get_appliance_root(path)
+    except ApplianceNotFoundError:
+        if not ignore_non_appliance:
+            raise
+        root = path
+    else:
+        common_data.initialize_common_data(root)
 
 
-def yield_appliance_items() -> Generator[classifier.Item, None, None]:
-    '''generator that yields everything "lintable"'''
+def yield_appliance_items() -> Iterator[classifier.Item]:
+    """Yield everything 'lintable'"""
 
     yield from common_data.iter_packages()
-    for path in locator.locator(APPLIANCE_ROOT):
+    for path in locator.locator(APPLIANCE_ROOT, False):
         yield classifier.FileItem(
             value=path,
             _tags={},

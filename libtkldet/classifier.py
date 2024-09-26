@@ -21,14 +21,16 @@ Encapsulates "Classifier"s & the "Item"s they operate on
 code here provides ability to "classify" different files
 """
 
+from collections.abc import Iterable, Iterator
 from dataclasses import dataclass
-from typing import Generator, Iterable, Type, cast
 from os.path import dirname
+from typing import ClassVar, cast
 
 
 @dataclass(frozen=True)
 class Item:
-    """Some "thing" which can be classified
+    """
+    Some "thing" which can be classified
 
     tags are used to classify items,
     value is dependant on type of "thing"
@@ -45,28 +47,43 @@ class Item:
     exactly how an item got classsified in a certain way """
 
     @property
-    def tags(self) -> Generator[str, None, None]:
-        """ yields all tags, may contain duplicates """
+    def tags(self) -> Iterator[str]:
+        """Yields all tags, may contain duplicates"""
         for tags in self._tags.values():
             yield from tags
 
-    def add_tags(self, classifier: "Classifier", tags: Iterable[str]):
-        """convenience method for adding tags to an item"""
+    def add_tags(self, classifier: "Classifier", tags: Iterable[str]) -> None:
+        """Add tags to an item"""
         name = classifier.__class__.__name__
         if name not in self._tags:
             self._tags[name] = set()
         self._tags[name].update(tags)
 
-    def pretty_print(self):
-        """show item value as well as tags"""
+    def has_tag(self, tag: str) -> bool:
+        """Check if item contains a given tag"""
+        return tag in self.tags
+
+    def has_tag_type(self, tag_type: str) -> bool:
+        """Check if item contains a variant tag of a given type"""
+        check = tag_type + ":"
+        return any(tag.startswith(check) for tag in self.tags)
+
+    def tags_with_type(self, tag_type: str) -> Iterator[str]:
+        """Return all tags with a variant tag of a given type"""
+        check = tag_type + ":"
+        return filter(lambda tag: tag.startswith(check), self.tags)
+
+    def pretty_print(self) -> None:
+        """Show item value as well as tags"""
         print(f"{self.value}")
         for src in self._tags:
-            print(src, self._tags[src])
+            print("\t", src, self._tags[src])
 
 
 @dataclass(frozen=True)
 class FileItem(Item):
-    """Specifically files which can be classified
+    """
+    Specifically files which can be classified
 
     value is the raw path found by the locator
     """
@@ -84,7 +101,8 @@ class FileItem(Item):
 
 @dataclass(frozen=True)
 class PackageItem(Item):
-    """Specifically packages installed via plan which can be classied
+    """
+    Specifically packages installed via plan which can be classied
 
     value is the package name
     """
@@ -98,54 +116,60 @@ class PackageItem(Item):
 
 
 class Classifier:
-    """Classifier base class
+    """
+    Classifier base class
 
-    all registered classifiers are called with each item yielded by the locator.
+    All registered classifiers are called with each item yielded by the
+    locator.
 
     the tags determined by the classifiers determine which linters are run on
     which files.
     """
 
-    WEIGHT: int = 100
+    WEIGHT: ClassVar[int] = 100
     """weight is used to order classifiers, as tthey can read tags as well,
     classifier can leverage information provided (or omitted) by previous
     classifiers"""
 
-    ItemType: Type[Item] = Item
+    ItemType: ClassVar[type[Item]] = Item
 
-    def do_classify(self, item: Item):
-        """actually perform a classification so long as the concrete item type
-        is compatible with this classifier"""
+    def do_classify(self, item: Item) -> None:
+        """
+        Perform classification
+
+        Perform a classification so long as the concrete item type
+        is compatible with this classifier
+        """
         if isinstance(item, self.ItemType):
             self.classify(item)
 
-    def classify(self, item: Item):
-        """abstract method to be implemented by subclass"""
-        raise NotImplementedError()
+    def classify(self, item: Item) -> None:
+        """Classify exact item type"""
+        raise NotImplementedError
 
 
 class FileClassifier(Classifier):
     """Specialized classifer which operates on "FileItem"s"""
 
-    ItemType: Type[Item] = FileItem
+    ItemType: ClassVar[type[Item]] = FileItem
 
 
 class PackageClassifier(Classifier):
     """Specialized classifier which operates on "PackageItem"s"""
 
-    ItemType: Type[Item] = PackageItem
+    ItemType: ClassVar[type[Item]] = PackageItem
 
 
 class ExactPathClassifier(FileClassifier):
     """Classifies an item which matches some exact path"""
 
-    path: str
+    path: ClassVar[str]
     "exact path to match"
 
-    tags: list[str]
+    tags: ClassVar[list[str]]
     "exact tags to add to matched item"
 
-    def classify(self, item: Item):
+    def classify(self, item: Item) -> None:
         item = cast(FileItem, item)
         # item will definitely be subclass of
         # cls.ItemType, just need to convince the type checker
@@ -157,16 +181,17 @@ class ExactPathClassifier(FileClassifier):
 class SubdirClassifier(FileClassifier):
     """Classifies an item which is inside a given subdirectory"""
 
-    path: str
+    path: ClassVar[str]
     "the parent directory"
 
-    recursive: bool
-    "whether to match a child of any depth or only files directly inside the given dir"
+    recursive: ClassVar[bool]
+    """whether to match a child of any depth or only files directly inside
+    the given dir"""
 
-    tags: list[str]
+    tags: ClassVar[list[str]]
     "exact tags to add to matched item"
 
-    def classify(self, item: Item):
+    def classify(self, item: Item) -> None:
         item = cast(FileItem, item)
         # item will definitely be subclass of
         # cls.ItemType, just need to convince the type checker
@@ -175,23 +200,26 @@ class SubdirClassifier(FileClassifier):
             if item.relpath.startswith(self.path):
                 # XXX doesn't handle any `..` in path, hopefully doesn't matter
                 item.add_tags(self, self.tags[:])
-        else:
-            if dirname(item.relpath) == self.path:
-                item.add_tags(self, self.tags[:])
+        elif dirname(item.relpath) == self.path:
+            item.add_tags(self, self.tags[:])
 
 
-_CLASSIFIERS: list[Type[Classifier]] = []
+_CLASSIFIERS: list[type[Classifier]] = []
 
 
-def register_classifier(classifier: Type[Classifier]):
-    """registers a classifier for use in tkldev-detective, must be called on all
-    classifiers added"""
+def register_classifier(classifier: type[Classifier]) -> type[Classifier]:
+    """
+    Register a classifier
+
+    This must be called on classifiers added
+    """
     _CLASSIFIERS.append(classifier)
     return classifier
 
 
 def get_weighted_classifiers() -> list[Classifier]:
-    """returns instances of registered classifiers in order of weight"""
+    """Return instances of registered classifiers in order of weight"""
     return sorted(
-        map(lambda x: x(), _CLASSIFIERS), key=lambda x: (x.WEIGHT, x.__class__.__name__)
+        (c() for c in _CLASSIFIERS),
+        key=lambda x: (x.WEIGHT, x.__class__.__name__),
     )

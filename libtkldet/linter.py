@@ -20,36 +20,40 @@ Encapsulates "Linter"s
 
 code here provides interface for modules to provide linting
 """
-from typing import Generator, Type, Optional
 
-from .classifier import Item, FileItem
+from collections.abc import Iterator
+from typing import ClassVar
+
+from .classifier import FileItem, Item
 from .report import Report
 
 
 class Linter:
-    """Base class for linters
+    """
+    Base class for linters
 
     by default linters automatically enable/disable based on `ENABLE_TAGS` and
     `DISABLE_TAGS`
     """
 
-    ENABLE_TAGS: set[str]
+    ENABLE_TAGS: ClassVar[set[str]]
     "tags which this linter should work on (or all if omitted)"
-    DISABLE_TAGS: set[str]
+    DISABLE_TAGS: ClassVar[set[str]]
     "tags which this linter should never work on"
 
-    WEIGHT: int = 100
+    WEIGHT: ClassVar[int] = 100
 
-    ItemType: Type[Item] = Item
+    ItemType: ClassVar[type[Item]] = Item
 
     def should_check(self, item: Item) -> bool:
-        """actually performs check to see if the linter should run on this item.
+        """
+        Actually performs check to see if the linter should run on this item
 
-        if `ENABLE_TAGS` is empty, run lint on all items except those that have
-        tags in `DISABLE_TAGS`
+        if `ENABLE_TAGS` is empty, run lint on all items except those
+        that have tags in `DISABLE_TAGS`
 
-        if `ENABLE_TAGS` has tags, run lint only on items which have at least 1 tag
-        from `ENABLE_TAGS` and non from `DISABLE_TAGS`
+        if `ENABLE_TAGS` has tags, run lint only on items which have at least
+        1 tag from `ENABLE_TAGS` and non from `DISABLE_TAGS`
 
         (safe to override)
         """
@@ -71,38 +75,41 @@ class Linter:
                 return False
         return True
 
-    def do_check(self, item: Item) -> Optional[Generator[Report, None, None]]:
-        """runs lint, if `should_check` returns True, used internally"""
+    def do_check(self, item: Item) -> Iterator[Report] | None:
+        """Run lint, if `should_check` returns True, used internally"""
         if isinstance(item, self.ItemType) and self.should_check(item):
             return self.check(item)
         return None
 
-    def check(self, item: Item) -> Generator[Report, None, None]:
-        """abstract method, actually runs lint, to be implemented by subclass"""
-        raise NotImplementedError()
+    def check(self, item: Item) -> Iterator[Report]:
+        """Actually run lint"""
+        raise NotImplementedError
 
 
 class FileLinter(Linter):
-    """ Specific linter that operates only on FileItems """
+    """Specific linter that operates only on FileItems"""
 
-    ItemType: Type[Item] = FileItem
+    ItemType: type[Item] = FileItem
 
-    def check(self, item: Item) -> Generator[Report, None, None]:
-        raise NotImplementedError()
-
-
-_LINTERS: list[Type[Linter]] = []
+    def check(self, item: Item) -> Iterator[Report]:
+        raise NotImplementedError
 
 
-def register_linter(linter: Type[Linter]):
-    """registers a linter for use in tkldev-detective, must be called on all
-    linters added"""
+_LINTERS: list[type[Linter]] = []
+
+
+def register_linter(linter: type[Linter]) -> type[Linter]:
+    """
+    Register a linter
+
+    Must be called on all linters added
+    """
     _LINTERS.append(linter)
     return linter
 
 
 def get_weighted_linters() -> list[Linter]:
-    """returnss instances of registered classifiers in order of weight"""
+    """Return instances of registered classifiers in order of weight"""
     return sorted(
-        map(lambda x: x(), _LINTERS), key=lambda x: (x.WEIGHT, x.__class__.__name__)
+        (x() for x in _LINTERS), key=lambda x: (x.WEIGHT, x.__class__.__name__)
     )

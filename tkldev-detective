@@ -18,31 +18,50 @@
 from argparse import ArgumentParser
 from os.path import relpath, abspath
 from typing import Generator
+import logging
 import sys
 
-from libtkldet import locator, modman, report, colors
+from libtkldet import locator, modman, colors
+from libtkldet.report import Report, filter_all_reports
 import libtkldet
 import libtkldet.error
+from libtkldet.error import ApplianceNotFoundError
 import libtkldet.classifier
 import libtkldet.linter
 
+logger = logging.getLogger('tkldev-detective')
 
 def perform_lint(
-    path: str, dump_tags: bool, skip_lint: bool
-) -> Generator[report.Report, None, None]:
-    libtkldet.initialize(path)
+    root_path: str, dump_tags: bool, skip_lint: bool, ignore_non_appliance: bool
+) -> Generator[Report, None, None]:
+    libtkldet.initialize(root_path, ignore_non_appliance)
+    try:
+        root = locator.get_appliance_root(root_path)
+    except ApplianceNotFoundError:
+        if not ignore_non_appliance:
+            raise
+        else:
+            root = root_path
 
-    root = locator.get_appliance_root(path)
-
-    for path in locator.locator(path):
+    for path in locator.locator(root_path, ignore_non_appliance):
         item = libtkldet.classifier.FileItem(
             value=path,
             _tags={},
             relpath=relpath(path, start=root),
             abspath=abspath(path),
         )
+        ignore = False
         for classifier in all_classifiers:
             classifier.classify(item)
+            if item.has_tag_type('ignore'):
+                logger.info('item "%s" skipped (tagged with %s)',
+                            item.abspath,
+                            ', '.join(map(repr, item.tags_with_type('ignore'))))
+                ignore = True
+                break
+        if ignore:
+            continue
+
         if dump_tags:
             item.pretty_print()
         if not skip_lint:
@@ -55,6 +74,8 @@ def perform_lint(
 if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument("--color", choices=["always", "never", "auto"], default="auto")
+    parser.add_argument("--log-level", choices=["debug", "info", "warn",
+                                                "error"], default="warn")
     subparsers = parser.add_subparsers(dest="action")
 
     list_parser = subparsers.add_parser("list")
@@ -73,11 +94,29 @@ if __name__ == "__main__":
         help="don't actually perform lint, only classification",
     )
     lint_parser.add_argument(
+        "-i",
+        "--ignore-non-appliance",
+        action="store_true",
+        help="if no appliance found, just try to lint target anyway",
+    )
+    lint_parser.add_argument(
         "target",
         help="appliance name, path to appliance or path to file inside appliance",
     )
 
     args = parser.parse_args()
+
+    log_level = logging.WARNING
+    if args.log_level == "debug":
+        log_level = logging.DEBUG
+    elif args.log_level == "info":
+        log_level = logging.INFO
+    elif args.log_level == "warn":
+        log_level = logging.WARNING
+    elif args.log_level == "error":
+        log_level = logging.ERROR
+
+    logging.basicConfig(level=log_level)
 
     if args.color == "auto":
         colors.set_colors_enabled(sys.stdout.isatty())
@@ -89,8 +128,14 @@ if __name__ == "__main__":
     all_classifiers = libtkldet.classifier.get_weighted_classifiers()
     all_linters = libtkldet.linter.get_weighted_linters()
 
-    linters_by_name = {l.__class__.__name__: l for l in all_linters}
-    classifiers_by_name = {c.__class__.__name__: c for c in all_classifiers}
+    linters_by_name = {
+        linter.__class__.__name__: linter
+        for linter in all_linters
+    }
+    classifiers_by_name = {
+        classifier.__class__.__name__: classifier
+        for classifier in all_classifiers
+    }
 
     if args.action == "list":
         if args.list_item in ("linters", "all"):
@@ -102,12 +147,17 @@ if __name__ == "__main__":
 
     elif args.action == "lint":
         try:
-            for report in report.filter_all_reports(
-                perform_lint(args.target, args.dump_tags, args.skip_lint)
+            for report in filter_all_reports(
+                perform_lint(
+                    args.target,
+                    args.dump_tags,
+                    args.skip_lint,
+                    args.ignore_non_appliance,
+                )
             ):
                 print("\n|   ".join(report.format().split("\n")))
                 print()
-        except libtkldet.error.PlanNotFound as e:
+        except libtkldet.error.PlanNotFoundError as e:
             print(
                 colors.RED
                 + "error: "

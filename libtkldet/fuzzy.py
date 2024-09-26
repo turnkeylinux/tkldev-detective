@@ -15,17 +15,18 @@
 # You should have received a copy of the GNU General Public License along with
 # tkldev-detective. If not, see <https://www.gnu.org/licenses/>.
 
-"""very basic fuzzy search"""
-
-from typing import Optional
+"""Very basic fuzzy search"""
 
 MAX_DIFF = 3
 "words that differ more than MAX_DIFF will not be suggested"
 
 
 def fuzzy_diff(x: str, y: str) -> int:
-    """given 2 string values, calculate a 'difference' between them, expressed
-    as an integer"""
+    """
+    Calculate difference between two strings
+
+    Return value has no objective meaning, only for comparison
+    """
     diff = 0
     for i in range(max(len(x), len(y))):
         if len(x) <= i or len(y) <= i:
@@ -35,8 +36,13 @@ def fuzzy_diff(x: str, y: str) -> int:
     return diff
 
 
-def fuzzy_suggest(check: str, options: list[str], max_diff=MAX_DIFF) -> Optional[str]:
-    """given a 'check' value, and a list of valid options, find the option
+def fuzzy_suggest(
+    check: str, options: list[str], max_diff: int = MAX_DIFF
+) -> str | None:
+    """
+    Suggest a string from given options
+
+    Given a 'check' value, and a list of valid options, find the option
     closest to the 'check' value, given that it's 'difference' (calculated by
     'fuzzy_diff' is less than or equal to max_diff
     """
