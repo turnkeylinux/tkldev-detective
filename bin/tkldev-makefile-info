@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import os
+from os.path import abspath
 import sys
 import json
 from argparse import ArgumentParser
@@ -69,7 +69,7 @@ broader applications)
             else:
                 return out
     try:
-        data = mkparser.parse_makefile(args.makefile).to_dict()
+        data = mkparser.parse_makefile(abspath(args.makefile)).to_dict()
     except FileNotFoundError as e:
         fatal("Makefile not found - please ensure that you are in app build code base dir")
 
