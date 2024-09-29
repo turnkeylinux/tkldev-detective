@@ -2,14 +2,27 @@
 from argparse import ArgumentParser
 from subprocess import check_output
 from os.path import isfile
+import os
 import sys
 import re
+import logging
 
-CHANGE_HEAD=r'^turnkey-.*-(\d+)\.(\d+)-?(?:rc|beta)? \((\d+)\) .*$'
+CHANGE_HEAD=r'^turnkey-[a-z0-9-]+-(\d+)\.(\d+)-?(?:rc|beta)?\d? \((\d+)\) .*$'
 CHANGE_FOOTER=r' -- .*'
+
+if 'DEVDEBUG' in os.environ:
+    log_level = logging.DEBUG
+else:
+    log_level = logging.CRITICAL
+logging.basicConfig(level=log_level,
+                    format='%(asctime)s %(name)-4s %(levelname)-5s %(message)s',
+                    datefmt='%H:%M:%S',
+                    )
+logger = logging.getLogger("tkldev-detective.changelog-extractor")
 
 def error(msg):
     print('ERROR: ' + msg, file=sys.stderr)
+
 def warn(msg):
     print('WARN: ' + msg, file=sys.stderr)
 
@@ -17,14 +30,18 @@ def process_changelog(path):
     if not isfile(path):
         warn(f"changelog {path} does not exist!")
         return {}
+    logger.info(f'running: process_changelog({path=})')
     changes = {}
     current_v = None
     skip = False
 
     with open(path, 'r') as fob:
+        logger.debug(f'opened {path}')
         for line in fob:
+            logger.debug(f'line: {line.rstrip()}')
             matched = re.match(CHANGE_HEAD, line)
             if matched:
+                logger.debug(f'matched header: {matched}')
                 major, minor, rel = matched.groups()
                 if len(major) > 3:
                     skip = True
@@ -41,15 +58,23 @@ def process_changelog(path):
 
             matched = re.match(CHANGE_FOOTER, line)
             if matched:
+                logger.debug(f'matched footer: {matched}')
                 current_v = None
                 skip = False
                 continue
 
             if skip:
+                logger.debug('skipping... (on matched header)')
                 continue
 
             if not line.strip():
+                logger.debug('line.strip() == None')
                 continue
+
+            logger.debug(f"About to assert 'current_v is not None' ({current_v=})")
+            if current_v is None:
+                error(f'no valid header found in {path}')
+                return {}
 
             assert current_v is not None
             if line.startswith('  *'):
