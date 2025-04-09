@@ -14,14 +14,58 @@
 #
 # You should have received a copy of the GNU General Public License along with
 # tkldev-detective. If not, see <https://www.gnu.org/licenses/>.
+"""General file classification"""
+
+from logging import getLogger
+from os.path import isfile, splitext
+from typing import ClassVar
+
 from libtkldet.classifier import FileClassifier, FileItem, register_classifier
-from os.path import splitext, isfile
+
+logger = getLogger(__name__)
 
 
 @register_classifier
 class FiletypeClassifier(FileClassifier):
-    WEIGHT = 10
+    """Classify files by extension"""
 
-    def classify(self, item: FileItem):
+    WEIGHT: ClassVar[int] = 10
+
+    def classify(self, item: FileItem) -> None:
         if isfile(item.abspath) and "." in item.value:
             item.add_tags(self, [f"ext:{splitext(item.value)[1][1:]}"])
+
+
+@register_classifier
+class ShebangClassifier(FileClassifier):
+    """Classify files by shebang"""
+
+    WEIGHT: ClassVar[int] = 10
+
+    def classify(self, item: FileItem) -> None:
+        if isfile(item.abspath):
+            other_parts = []
+            with open(item.abspath, "rb") as fob:
+                shebang = b""
+                head = fob.read(512)
+
+                if b"\n" in head:
+                    shebang = head.split(b"\n")[0].strip()
+                    if shebang:
+                        other_parts = shebang.split()
+                        shebang = other_parts.pop(0)
+
+            try:
+                other_parts = [part.decode() for part in other_parts]
+                shebang = shebang.decode().strip()
+            except UnicodeDecodeError:
+                logger.debug("failed to decode shebang", exc_info=True)
+                item.add_tags(self, ["not-utf8"])
+            else:
+                if shebang.startswith("#!"):
+                    if shebang == "#!/usr/bin/env":
+                        item.add_tags(
+                            self, [f"shebang:{shebang[2:]} {other_parts[0]}"]
+                        )
+                    else:
+                        item.add_tags(self, [f"shebang:{shebang[2:]}"])

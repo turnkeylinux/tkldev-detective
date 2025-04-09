@@ -15,19 +15,22 @@
 # You should have received a copy of the GNU General Public License along with
 # tkldev-detective. If not, see <https://www.gnu.org/licenses/>.
 
-from typing import Generator, Optional
-
-from libtkldet.report import Report, ReportLevel, register_filter, ReportFilter
-from libtkldet.linter import FileItem
-from libtkldet.apt_file import find_python_package_from_import
-from libtkldet.common_data import is_package_to_be_installed, get_path_in_common_overlay
-from os.path import dirname
 import re
+from collections.abc import Generator
+from os.path import dirname
+
+from libtkldet.apt_file import find_python_package_from_import
+from libtkldet.common_data import (
+    get_path_in_common_overlay,
+    is_package_to_be_installed,
+)
+from libtkldet.linter import FileItem
+from libtkldet.report import Report, ReportFilter, ReportLevel, register_filter
 
 MISSING_MODULE_RE = re.compile(r"^Unable to import '(.*)'$")
 
 
-def filter_packaged(report: Report, module_name: str) -> Optional[Report]:
+def filter_packaged(report: Report, module_name: str) -> Report | None:
     packages = find_python_package_from_import(module_name)
 
     modified_fix = report.fix or ""
@@ -48,7 +51,7 @@ def filter_packaged(report: Report, module_name: str) -> Optional[Report]:
                 modified_level = ReportLevel.INFO
                 modified_message += (
                     f' ("{package}" likely provides this '
-                    + "module and will be installed at build time)"
+                    "module and will be installed at build time)"
                 )
                 package_installed = True
                 break
@@ -56,7 +59,8 @@ def filter_packaged(report: Report, module_name: str) -> Optional[Report]:
             if len(packages) > 1:
                 packages_str = ", ".join('"' + pkg + '"' for pkg in packages)
                 modified_message += (
-                    f" (perhaps you meant to add one of {packages_str} to the plan?)"
+                    " (perhaps you meant to add one of"
+                    f" {packages_str} to the plan?)"
                 )
             else:
                 modified_message += (
@@ -73,7 +77,7 @@ class MissingModuleFilter(ReportFilter):
     def filter(self, report: Report) -> Generator[Report, None, None]:
         if (
             report.source == "pylint"
-            and report.raw != None
+            and report.raw is not None
             and report.raw["symbol"] == "import-error"
         ):
             match = MISSING_MODULE_RE.match(report.raw["message"])
@@ -82,7 +86,8 @@ class MissingModuleFilter(ReportFilter):
 
             if (
                 isinstance(report.item, FileItem)
-                and dirname(report.item.relpath) == "overlay/usr/lib/inithooks/bin"
+                and dirname(report.item.relpath)
+                == "overlay/usr/lib/inithooks/bin"
             ):
                 temp_module_name = module_name
                 if "." in temp_module_name:

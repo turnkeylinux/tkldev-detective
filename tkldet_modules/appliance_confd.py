@@ -14,30 +14,36 @@
 #
 # You should have received a copy of the GNU General Public License along with
 # tkldev-detective. If not, see <https://www.gnu.org/licenses/>.
-from typing import Generator
-import stat
-import os
 
-from libtkldet.linter import FileLinter, register_linter, FileItem
-from libtkldet.report import Report, FileReport, ReportLevel
+"""Lints for appliance conf.d/* scripts"""
+
+import os
+import stat
+from collections.abc import Generator
+from typing import ClassVar
+
+from libtkldet.linter import FileItem, FileLinter, register_linter
+from libtkldet.report import FileReport, Report, ReportLevel
 
 
 @register_linter
 class ApplianceConfDLinter(FileLinter):
-    ENABLE_TAGS: set[str] = {"appliance-conf.d"}
-    DISABLE_TAGS: set[str] = set()
+    ENABLE_TAGS: ClassVar[set[str]] = {"appliance-conf.d"}
+    DISABLE_TAGS: ClassVar[set[str]] = set()
 
     def check(self, item: FileItem) -> Generator[Report, None, None]:
         mode = os.lstat(item.abspath).st_mode
         if not (
-            (mode & stat.S_IXUSR) or (mode & stat.S_IXGRP) or (mode & stat.S_IXOTH)
+            (mode & stat.S_IXUSR)
+            or (mode & stat.S_IXGRP)
+            or (mode & stat.S_IXOTH)
         ):
             yield FileReport(
                 item=item,
                 line=None,
                 column=None,
                 location_metadata=None,
-                message=f"conf.d script isn't executable",
+                message="conf.d script isn't executable",
                 fix=f"`chmod +x {item.abspath}`",
                 source="confd linter",
                 level=ReportLevel.ERROR,

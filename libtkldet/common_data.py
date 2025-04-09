@@ -17,12 +17,13 @@
 """Utilities and data relating to ${FAB_PATH}/common"""
 
 import os
-from os.path import join, isfile
-from typing import Generator, Optional
-from .plan_resolve import parse_plan, PlanEntry
-from .locator import iter_plan
+from collections.abc import Iterator
+from os.path import isfile, join
+
 from .classifier import PackageItem
-from .mkparser import parse_makefile, CommonFabBuildData
+from .locator import iter_plan
+from .mkparser import CommonFabBuildData, parse_makefile
+from .plan_resolve import PlanEntry, parse_plan
 
 APPLIANCE_ROOT: str = ""
 _PLAN_RESOLVE_CACHE: list[PlanEntry] = []
@@ -30,9 +31,9 @@ _INCLUDED_PLAN_CACHE: set[str] = set()
 _FAB_DATA: CommonFabBuildData
 
 
-def initialize_common_data(appliance_root: str):
-    """parse plan & makefile and initialize data which utilizes it"""
-    global APPLIANCE_ROOT, _PLAN_RESOLVE_CACHE, _INCLUDED_PLAN_CACHE, _FAB_DATA
+def initialize_common_data(appliance_root: str) -> None:
+    """Parse plan & makefile and initialize data which utilizes it"""
+    global APPLIANCE_ROOT, _FAB_DATA
     APPLIANCE_ROOT = appliance_root
 
     for plan_path in iter_plan(appliance_root):
@@ -47,54 +48,62 @@ def initialize_common_data(appliance_root: str):
 
 
 def is_package_to_be_installed(package_name: str) -> bool:
-    """check if an apt package will be installed via plan"""
-    for entry in _PLAN_RESOLVE_CACHE:
-        if entry.package_name == package_name:
-            return True
-    return False
+    """Check if an apt package will be installed via plan"""
+    return any(
+        entry.package_name == package_name for entry in _PLAN_RESOLVE_CACHE
+    )
 
 
 def is_common_plan_included(plan_name: str) -> bool:
-    """check if a common plan (by file name) is included in appliance build """
+    """Check if a common plan (by file name) is included in appliance build"""
     return join("/turnkey/fab/common/plans", plan_name) in _INCLUDED_PLAN_CACHE
 
 
-def iter_packages() -> Generator[PackageItem, None, None]:
-    """ iterate over all packages which will be installed """
+def iter_packages() -> Iterator[PackageItem]:
+    """Iterate over all packages which will be installed"""
     for entry in _PLAN_RESOLVE_CACHE:
         yield PackageItem(
-            value=entry.package_name, _tags={}, plan_stack=entry.include_stack[:]
+            value=entry.package_name,
+            _tags={},
+            plan_stack=entry.include_stack[:],
         )
 
 
 def get_common_overlays() -> list[str]:
-    """ return a list of all common overlays included in this appliance """
+    """Return a list of all common overlays in this appliance"""
     return _FAB_DATA.overlays[:]
 
 
 def get_common_conf() -> list[str]:
-    """ return a list of all common conf scripts included in this appliance """
+    """Return a list of all common conf scripts in this appliance"""
     return _FAB_DATA.conf[:]
 
 
 def get_common_removelists() -> list[str]:
-    """ return a list of all common removelists included in this appliance """
+    """Return a list of all common removelists in this appliance"""
     return _FAB_DATA.removelists[:]
 
 
 def get_common_removelists_final() -> list[str]:
-    """ return a list of all common final removelists included in this appliance """
+    """Return a list of all common final removelists in this appliance"""
     return _FAB_DATA.removelists_final[:]
 
 
-def get_path_in_common_overlay(path: str) -> Optional[str]:
-    """check if a given path (expressed as an absolute path, where it would be
+def get_path_in_common_overlay(path: str) -> str | None:
+    """
+    Get overlay path from absolute path
+
+    Check if a given path (expressed as an absolute path, where it would be
     placed in a build) is included in build, if so the path to the file/dir IN
-    the common overlay is returned. Otherwise None is returned."""
+    the common overlay is returned. Otherwise None is returned.
+    """
     path = path.lstrip("/")
     for common in _FAB_DATA.overlays:
         common_path = join(
-            os.getenv("FAB_PATH", "/turnkey/fab"), "common/overlays", common, path
+            os.getenv("FAB_PATH", "/turnkey/fab"),
+            "common/overlays",
+            common,
+            path,
         )
         if isfile(common_path):
             return common_path

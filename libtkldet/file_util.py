@@ -15,16 +15,19 @@
 # You should have received a copy of the GNU General Public License along with
 # tkldev-detective. If not, see <https://www.gnu.org/licenses/>.
 
-"""
-Utilities relating to classification/linting files
-"""
-from typing import Optional
+"""Utilities relating to classification/linting files"""
 
 
-def position_from_char_offset(path: str, offset: int) -> Optional[tuple[int, int]]:
-    """given an offset into a file (decodes), returns the line and column numbers
-    respectively, expressed as a tuple. If offset is invalid (such as too large
-    for file) None is returned"""
+def position_from_char_offset(
+    path: str, offset: int
+) -> tuple[int, int] | None:
+    """
+    Get column/line from offset into file
+
+    Given an offset into a file, returns the line and column numbers
+    respectively, expressed as a tuple. If offset is invalid (such as too
+    large for file) None is returned
+    """
     line = 0
     col = 0
     with open(path, "r") as fob:
@@ -40,10 +43,16 @@ def position_from_char_offset(path: str, offset: int) -> Optional[tuple[int, int
     return None
 
 
-def position_from_byte_offset(path: str, offset: int) -> Optional[tuple[int, int]]:
-    """given an offset into a file (raw), returns the line and column numbers
-    respectively, expressed as a tuple. If offset is invalid (such as too large
-    for file) None is returned"""
+def position_from_byte_offset(
+    path: str, offset: int
+) -> tuple[int, int] | None:
+    """
+    Get column/line from offset into file in binary mode
+
+    Given an offset into a file (in binary mode), returns the line and column
+    numbers respectively, expressed as a tuple. If offset is invalid (such as
+    too large for file) None is returned
+    """
     line = 0
     col = 0
     with open(path, "rb") as fob:
@@ -51,7 +60,7 @@ def position_from_byte_offset(path: str, offset: int) -> Optional[tuple[int, int
             if i == offset:
                 return line, col
 
-            if char == b"\n":
+            if char == ord(b"\n"):
                 line += 1
                 col = 0
             else:

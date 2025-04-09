@@ -14,6 +14,10 @@
 #
 # You should have received a copy of the GNU General Public License along with
 # tkldev-detective. If not, see <https://www.gnu.org/licenses/>.
+"""Classifiers for appliance specific files"""
+
+from typing import ClassVar
+
 from libtkldet.classifier import (
     ExactPathClassifier,
     SubdirClassifier,
@@ -23,52 +27,68 @@ from libtkldet.classifier import (
 
 @register_classifier
 class ApplianceMakefileClassifier(ExactPathClassifier):
-    path: str = "Makefile"
-    tags: list[str] = ["appliance-makefile"]
+    """Classifies appliance Makefile"""
+
+    path: ClassVar[str] = "Makefile"
+    tags: ClassVar[list[str]] = ["appliance-makefile"]
 
 
 @register_classifier
 class ApplianceConfDClassifier(SubdirClassifier):
-    path: str = "conf.d"
-    recursive: bool = False
-    tags: list[str] = ["appliance-conf.d"]
+    """Classifies appliance conf.d scripts"""
+
+    path: ClassVar[str] = "conf.d"
+    recursive: ClassVar[bool] = False
+    tags: ClassVar[list[str]] = ["appliance-conf.d"]
 
 
 @register_classifier
 class ApplianceOverlayClassifier(SubdirClassifier):
-    path: str = "overlay"
-    recursive: bool = True
-    tags: list[str] = ["appliance-overlay"]
+    """Classifies appliance overlay files"""
+
+    path: ClassVar[str] = "overlay"
+    recursive: ClassVar[bool] = True
+    tags: ClassVar[list[str]] = ["appliance-overlay"]
 
 
 @register_classifier
 class AppliancePlanClassifier(SubdirClassifier):
-    path: str = "plan"
-    recursive: bool = False
-    tags: list[str] = ["appliance-plan"]
+    """Classifies appliance plans"""
+
+    path: ClassVar[str] = "plan"
+    recursive: ClassVar[bool] = False
+    tags: ClassVar[list[str]] = ["appliance-plan"]
 
 
 @register_classifier
 class ApplianceInithookFirstbootClassifier(SubdirClassifier):
-    path: str = "overlay/usr/lib/inithooks/firstboot.d"
-    recursive: bool = False
-    tags: list[str] = ["appliance-inithook-firstboot"]
+    """Classifies appliance firstboot inithooks"""
+
+    path: ClassVar[str] = "overlay/usr/lib/inithooks/firstboot.d"
+    recursive: ClassVar[bool] = False
+    tags: ClassVar[list[str]] = ["appliance-inithook-firstboot"]
 
 
 @register_classifier
 class ApplianceInithookBinClassifier(SubdirClassifier):
-    path: str = "overlay/usr/lib/inithooks/bin"
-    recursive: bool = False
-    tags: list[str] = ["appliance-inithook-bin"]
+    """Classifies appliance inithooks bin scripts"""
+
+    path: ClassVar[str] = "overlay/usr/lib/inithooks/bin"
+    recursive: ClassVar[bool] = False
+    tags: ClassVar[list[str]] = ["appliance-inithook-bin"]
 
 
 @register_classifier
 class ApplianceReadmeClassifier(ExactPathClassifier):
-    path: str = "README.rst"
-    tags: list[str] = ["appliance-readme"]
+    """Classifies appliance readme"""
+
+    path: ClassVar[str] = "README.rst"
+    tags: ClassVar[list[str]] = ["appliance-readme"]
 
 
 @register_classifier
 class ApplianceChangelogClassifier(ExactPathClassifier):
-    path: str = "changelog"
-    tags: list[str] = ["appliance-readme"]
+    """Classifies appliance changelog"""
+
+    path: ClassVar[str] = "changelog"
+    tags: ClassVar[list[str]] = ["appliance-readme"]
